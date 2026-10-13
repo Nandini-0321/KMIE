@@ -224,63 +224,11 @@
     </div>
 
     <!-- ================================================================
-         BOOKED DEMO SESSION & FIND MY BOOKING SECTION
+         FIND MY DEMO BOOKING SECTION (Self-Service Lookup)
     ================================================================ -->
     <div class="demo-access-wrapper" id="booked-demo-section" style="margin-top: 24px;">
-      
-      <!-- A. Direct Demo Meeting Link Card -->
-      <section class="portal-card demo-access-card" aria-labelledby="demo-access-heading">
-        <div class="card-badge-row">
-          <span class="status-badge status-badge--mint">
-            <span class="status-dot"></span> Live Classroom Access
-          </span>
-        </div>
-        <div class="section-header">
-          <h2 class="section-title" id="demo-access-heading" style="font-size: 20px;">Booked for a Demo Session?</h2>
-          <p class="section-subtitle">
-            If you have already booked a demo session, visit the link below to join your live interactive class.
-          </p>
-        </div>
-
-        <div class="demo-access-content">
-          <div class="demo-access-box">
-            <div class="demo-access-icon">
-              <span>🎥</span>
-            </div>
-            <div class="demo-access-details">
-              <span class="demo-access-label">Official Demo Session Link:</span>
-              <a
-                href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="demo-access-url"
-                id="directDemoLink"
-              >
-                {{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}
-              </a>
-              <p class="demo-access-hint">
-                Please join 5 minutes before your scheduled slot with audio and video enabled.
-              </p>
-            </div>
-          </div>
-
-          <div class="demo-access-action">
-            <a
-              href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn btn--primary btn--demo-join"
-              id="joinDemoBtn"
-            >
-              <span class="btn-icon">🔗</span>
-              Visit Demo Session Link
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- B. Find Your Demo Booking Card (Self-Service Lookup) -->
-      <section class="portal-card find-booking-card" id="findBookingCard" style="margin-top: 18px;" aria-labelledby="find-booking-heading">
+      <!-- Find Your Demo Booking Card (Self-Service Lookup) -->
+      <section class="portal-card find-booking-card" id="findBookingCard" aria-labelledby="find-booking-heading">
         <div class="section-header">
           <div class="stage-tag" style="background: rgba(13, 148, 136, 0.12); color: #0f766e;">Appointment Self-Service</div>
           <h3 class="section-title" id="find-booking-heading" style="font-size: 20px;">Find Your Demo Booking</h3>
