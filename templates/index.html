@@ -44,36 +44,55 @@
   </section>
 
   <!-- ================================================================
-       3. 4 DAILY DEMO TIME SLOTS INFORMATION CARD
+       3. LIVE DEMO SESSION ACCESS CARD (For booked students)
   ================================================================ -->
-  <section class="portal-card time-slots-card" aria-labelledby="slots-heading">
+  <section class="portal-card demo-access-card" aria-labelledby="demo-access-heading">
+    <div class="card-badge-row">
+      <span class="status-badge status-badge--mint">
+        <span class="status-dot"></span> Live Classroom Access
+      </span>
+    </div>
     <div class="section-header">
-      <h2 class="section-title" id="slots-heading">4 Daily Demo Time Slots</h2>
+      <h2 class="section-title" id="demo-access-heading">Booked for a Demo Session?</h2>
       <p class="section-subtitle">
-        Choose a convenient session time and take the first step towards your learning goals.
+        If you have already booked a demo session, visit the link below to join your live interactive class.
       </p>
     </div>
-    <div class="slots-pill-grid">
-      <button type="button" class="slot-pill" data-slot="13:00" onclick="selectQuickSlot('13:00')" aria-label="Select 1:00 PM Demo Slot">
-        <span class="slot-pill-time">1:00 PM</span>
-        <span class="slot-pill-zone">IST</span>
-      </button>
-      <button type="button" class="slot-pill" data-slot="15:00" onclick="selectQuickSlot('15:00')" aria-label="Select 3:00 PM Demo Slot">
-        <span class="slot-pill-time">3:00 PM</span>
-        <span class="slot-pill-zone">IST</span>
-      </button>
-      <button type="button" class="slot-pill" data-slot="17:00" onclick="selectQuickSlot('17:00')" aria-label="Select 5:00 PM Demo Slot">
-        <span class="slot-pill-time">5:00 PM</span>
-        <span class="slot-pill-zone">IST</span>
-      </button>
-      <button type="button" class="slot-pill" data-slot="19:00" onclick="selectQuickSlot('19:00')" aria-label="Select 7:00 PM Demo Slot">
-        <span class="slot-pill-time">7:00 PM</span>
-        <span class="slot-pill-zone">IST</span>
-      </button>
+
+    <div class="demo-access-content">
+      <div class="demo-access-box">
+        <div class="demo-access-icon">
+          <span>🎥</span>
+        </div>
+        <div class="demo-access-details">
+          <span class="demo-access-label">Official Demo Session Link:</span>
+          <a
+            href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="demo-access-url"
+          >
+            {{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}
+          </a>
+          <p class="demo-access-hint">
+            Please join 5 minutes before your scheduled slot with audio and video enabled.
+          </p>
+        </div>
+      </div>
+
+      <div class="demo-access-action">
+        <a
+          href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn--primary btn--demo-join"
+          id="joinDemoBtn"
+        >
+          <span class="btn-icon">🔗</span>
+          Visit Demo Session Link
+        </a>
+      </div>
     </div>
-    <p class="slots-footnote">
-      💡 <em>Tap any slot to quickly select it in the Demo Booking form.</em>
-    </p>
   </section>
 
   <!-- ================================================================

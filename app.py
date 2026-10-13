@@ -30,6 +30,7 @@ from services.booking_service import (
     create_or_reschedule_booking,
     update_booking_status,
     get_all_bookings,
+    get_zoom_placeholder_url,
 )
 from services.google_sheets_service import (
     is_configured as is_sheets_configured,
@@ -138,6 +139,7 @@ def index():
         stats=stats,
         db_status=db_status,
         error_message=error_message,
+        demo_meeting_url=get_zoom_placeholder_url(),
     )
 
 
