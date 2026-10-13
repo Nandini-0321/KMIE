@@ -227,40 +227,39 @@
          FIND MY DEMO BOOKING SECTION (Self-Service Lookup)
     ================================================================ -->
     <div class="demo-access-wrapper" id="booked-demo-section" style="margin-top: 24px;">
-      <!-- Find Your Demo Booking Card (Self-Service Lookup) -->
+      <!-- Find Your Demo Session Card (Compact Search Card) -->
       <section class="portal-card find-booking-card" id="findBookingCard" aria-labelledby="find-booking-heading">
-        <div class="section-header">
-          <div class="stage-tag" style="background: rgba(13, 148, 136, 0.12); color: #0f766e;">Appointment Self-Service</div>
-          <h3 class="section-title" id="find-booking-heading" style="font-size: 20px;">Find Your Demo Booking</h3>
+        <div class="section-header" style="margin-bottom: 16px;">
+          <h3 class="section-title" id="find-booking-heading" style="font-size: 20px;">Find Your Demo Session</h3>
           <p class="section-subtitle">
-            Already registered or booked a demo? Retrieve your appointment details using your booking ID, phone number, or email address.
+            Already registered with KMIE? Retrieve your enquiry or demo appointment using one of your registered details.
           </p>
         </div>
 
         <!-- Search Form -->
         <form id="findBookingForm" class="find-booking-form" onsubmit="return findBookingHandler(event)" novalidate>
           <div class="search-methods-wrap">
-            <span class="search-methods-label">Search using:</span>
-            <div class="search-tabs" role="tablist" aria-label="Search Criteria Options">
+            <span class="search-methods-label">Choose search method:</span>
+            <div class="search-tabs" role="tablist" aria-label="Search Options">
               <button
                 type="button"
                 class="search-tab search-tab--active"
-                data-method="id"
+                data-method="reference"
                 role="tab"
                 aria-selected="true"
-                onclick="switchSearchMethod('id')"
+                onclick="switchSearchMethod('reference')"
               >
-                Booking / Enquiry ID
+                Enquiry / Booking Reference
               </button>
               <button
                 type="button"
                 class="search-tab"
-                data-method="phone"
+                data-method="mobile"
                 role="tab"
                 aria-selected="false"
-                onclick="switchSearchMethod('phone')"
+                onclick="switchSearchMethod('mobile')"
               >
-                Phone Number
+                Mobile Number
               </button>
               <button
                 type="button"
@@ -275,29 +274,29 @@
             </div>
           </div>
 
-          <input type="hidden" id="find_search_type" name="search_type" value="id" />
+          <input type="hidden" id="find_search_type" name="search_type" value="reference" />
 
-          <div class="form-group" style="margin-top: 16px;">
+          <div class="form-group" style="margin-top: 14px;">
             <label class="form-label" id="findInputLabel" for="find_search_value">
-              Booking / Enquiry Reference ID <span class="required">*</span>
+              Enquiry / Booking Reference <span class="required">*</span>
             </label>
             <input
               type="text"
               id="find_search_value"
               name="search_value"
               class="form-control"
-              placeholder="Enter your reference ID (e.g. 1 or #1)"
+              placeholder="Enter your enquiry or booking reference"
               required
               autocomplete="off"
             />
-            <span class="form-hint" id="findInputHint">Accepts your Demo Booking Reference ID or Student Enquiry Lead ID.</span>
+            <span class="form-hint" id="findInputHint">Use your registered Enquiry Reference ID (e.g. 1) or Booking Reference.</span>
             <span class="form-error" id="findError" style="display: none;"></span>
           </div>
 
           <div class="find-form-actions">
             <button type="submit" class="btn btn--primary" id="findBookingSubmitBtn">
               <span class="btn-icon">🔍</span>
-              Find My Booking
+              Find My Details
             </button>
             <button type="button" class="btn btn--ghost" id="findBookingClearBtn" onclick="clearFindBooking()">
               Clear

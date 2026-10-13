@@ -368,16 +368,16 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
         lead_row = None
         booking_row = None
 
-        if stype in ("id", "booking_id", "enquiry_id", "ref_id"):
+        if stype in ("reference", "ref", "id", "booking_id", "enquiry_id", "ref_id"):
             clean_id_str = sval.lstrip("#").replace("Lead", "").replace("Booking", "").replace("B-", "").replace("L-", "").strip()
             if not clean_id_str.isdigit():
                 return {
                     "success": False,
-                    "error": "Please enter a valid numeric reference ID (e.g. 1 or #1).",
+                    "error": "Please enter a valid enquiry or booking reference (e.g. 1 or #1).",
                 }
             ref_id = int(clean_id_str)
 
-            # Try finding booking first by booking id
+            # 1. Try finding by booking ID
             cursor.execute(
                 """
                 SELECT b.*, l.student_name, l.phone, l.phone_e164, l.email,
@@ -402,12 +402,11 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
                     "interested_course": booking_row["interested_course"],
                 }
             else:
-                # Try finding lead by lead id
+                # 2. Try finding by lead/enquiry ID
                 cursor.execute("SELECT * FROM leads WHERE id = ?", (ref_id,))
                 l_match = cursor.fetchone()
                 if l_match:
                     lead_row = dict(l_match)
-                    # Check if this lead has a booking
                     cursor.execute("SELECT * FROM bookings WHERE lead_id = ?", (ref_id,))
                     b_by_lead = cursor.fetchone()
                     if b_by_lead:
@@ -416,7 +415,6 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
         elif stype in ("phone", "mobile", "phone_number"):
             phone_e164 = normalize_phone_e164(sval)
             if not phone_e164:
-                # If user entered 10 digits without prefix, try +91
                 digits_only = "".join(c for c in sval if c.isdigit())
                 if len(digits_only) == 10 and digits_only[0] in "6789":
                     phone_e164 = normalize_phone_e164("+91" + digits_only)
@@ -430,10 +428,28 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
             cursor.execute("SELECT * FROM leads WHERE phone_e164 = ? OR phone = ?", (phone_e164, sval))
             matches = cursor.fetchall()
             if len(matches) > 1:
+                multiple_records = []
+                for m_row in matches:
+                    m = dict(m_row)
+                    cursor.execute("SELECT * FROM bookings WHERE lead_id = ?", (m["id"],))
+                    b_item_row = cursor.fetchone()
+                    b_item = dict(b_item_row) if b_item_row else None
+                    multiple_records.append({
+                        "lead_id": m["id"],
+                        "student_name": m["student_name"],
+                        "class_level": m.get("class_level"),
+                        "exam_goal": m.get("exam_goal"),
+                        "interested_course": m.get("interested_course"),
+                        "has_booking": b_item is not None,
+                        "demo_date": b_item["demo_date"] if b_item else None,
+                        "slot_time_display": display_slot_time(b_item["slot_time"]) if b_item else None,
+                        "booking_status": b_item["booking_status"] if b_item else "Enquiry Registered",
+                    })
                 return {
-                    "success": False,
-                    "ambiguous": True,
-                    "error": "Multiple records found for this phone number. Please search using your Booking / Enquiry ID to identify your booking.",
+                    "success": True,
+                    "state": "multiple_records",
+                    "matches": multiple_records,
+                    "message": "Multiple records found for this mobile number. Please choose your enquiry below:",
                 }
             elif len(matches) == 1:
                 lead_row = dict(matches[0])
@@ -453,10 +469,28 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
             cursor.execute("SELECT * FROM leads WHERE lower(email) = ?", (cleaned_email,))
             matches = cursor.fetchall()
             if len(matches) > 1:
+                multiple_records = []
+                for m_row in matches:
+                    m = dict(m_row)
+                    cursor.execute("SELECT * FROM bookings WHERE lead_id = ?", (m["id"],))
+                    b_item_row = cursor.fetchone()
+                    b_item = dict(b_item_row) if b_item_row else None
+                    multiple_records.append({
+                        "lead_id": m["id"],
+                        "student_name": m["student_name"],
+                        "class_level": m.get("class_level"),
+                        "exam_goal": m.get("exam_goal"),
+                        "interested_course": m.get("interested_course"),
+                        "has_booking": b_item is not None,
+                        "demo_date": b_item["demo_date"] if b_item else None,
+                        "slot_time_display": display_slot_time(b_item["slot_time"]) if b_item else None,
+                        "booking_status": b_item["booking_status"] if b_item else "Enquiry Registered",
+                    })
                 return {
-                    "success": False,
-                    "ambiguous": True,
-                    "error": "Multiple records found for this email address. Please search using your Booking / Enquiry ID to identify your booking.",
+                    "success": True,
+                    "state": "multiple_records",
+                    "matches": multiple_records,
+                    "message": "Multiple records found for this email address. Please choose your enquiry below:",
                 }
             elif len(matches) == 1:
                 lead_row = dict(matches[0])
@@ -467,19 +501,46 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
         else:
             return {
                 "success": False,
-                "error": f"Unsupported search method '{search_type}'. Please choose Booking ID, Phone, or Email.",
+                "error": f"Unsupported search method '{search_type}'. Please choose Reference, Mobile, or Email.",
             }
 
         if not lead_row:
             return {
                 "success": False,
+                "state": "not_found",
                 "not_found": True,
-                "message": "We couldn't find a matching record. Please check your details and try again.",
+                "title": "We couldn't find your record.",
+                "message": "Check the details you entered and try again, or contact KMIE administration for assistance.",
             }
 
-        # Format retrieved payload
         has_booking = booking_row is not None
-        zoom_link = (booking_row.get("zoom_link") if has_booking else "") or get_zoom_placeholder_url()
+
+        # Resolve meeting link strictly from the booking or configured DEMO_MEETING_URL
+        zoom_link = None
+        if has_booking:
+            raw_link = (booking_row.get("zoom_link") or "").strip()
+            if raw_link:
+                zoom_link = raw_link
+            else:
+                cfg_link = os.getenv("DEMO_MEETING_URL", "").strip()
+                zoom_link = cfg_link if cfg_link else None
+
+        # Determine exact booking state according to Section 3
+        # State A: enquiry_registered
+        # State B: booking_confirmed (Booked and meeting link available)
+        # State C: booking_no_link (Booked and meeting link is missing)
+        # State D: booking_attended or booking_not_attended
+        if not has_booking:
+            state = "enquiry_registered"
+            zoom_link = None
+        else:
+            b_status = booking_row.get("booking_status", "Booked")
+            if b_status == "Attended":
+                state = "booking_attended"
+            elif b_status == "Not Attended":
+                state = "booking_not_attended"
+            else:
+                state = "booking_confirmed" if zoom_link else "booking_no_link"
 
         demo_date_str = booking_row.get("demo_date") if has_booking else None
         demo_date_formatted = None
@@ -492,11 +553,12 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
 
         slot_time_raw = booking_row.get("slot_time") if has_booking else None
         slot_time_display = display_slot_time(slot_time_raw) if slot_time_raw else None
-        booking_status = booking_row.get("booking_status", "Booked") if has_booking else "Registered — Demo Not Yet Booked"
+        booking_status = booking_row.get("booking_status", "Booked") if has_booking else "Enquiry Registered"
         sheet_sync = booking_row.get("sheet_sync_status") if has_booking else lead_row.get("sheet_sync_status", "pending")
 
         return {
             "success": True,
+            "state": state,
             "has_booking": has_booking,
             "data": {
                 "student_name": lead_row["student_name"],
@@ -521,7 +583,7 @@ def find_booking_or_enquiry(search_type: str, search_value: str, conn=None) -> d
         logger.error("Error finding booking or enquiry: %s", exc)
         return {
             "success": False,
-            "error": "A server error occurred while retrieving your booking details. Please try again later.",
+            "error": "A server error occurred while retrieving your details. Please try again later.",
         }
     finally:
         if own_conn and connection:

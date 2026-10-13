@@ -2228,11 +2228,12 @@ img, svg {
 }
 
 /* Result Card */
-.find-result-card {
+.find-result-card,
+.find-matches-card {
   background: var(--surface-white);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 22px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
   animation: fadeInStage 0.3s ease;
 }
@@ -2242,49 +2243,49 @@ img, svg {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   margin-bottom: 16px;
 }
 
-.find-badge-success {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.find-record-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-headings);
+}
+
+.find-header-ref {
   font-size: 12px;
   font-weight: 600;
-  color: #15803d;
-  background: #dcfce7;
-  padding: 4px 10px;
+  color: var(--primary-teal);
+  background: var(--pale-mint);
+  padding: 3px 10px;
   border-radius: 20px;
+  border: 1px solid rgba(13, 148, 136, 0.2);
 }
 
-.find-header-lead {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--dark-teal);
-}
-
+/* Responsive Two-Column Detail Layout on Desktop, Single-Column on Mobile */
 .find-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .find-details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
 .find-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.find-item--full {
-  grid-column: 1 / -1;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border-color);
 }
 
 .find-label {
@@ -2297,62 +2298,173 @@ img, svg {
 
 .find-value {
   font-size: 13.5px;
+  font-weight: 500;
   color: var(--text-headings);
+  word-break: break-word;
 }
 
-.find-meeting-box {
+/* Status Badges */
+.find-badge-info,
+.find-badge-active,
+.find-badge-warning,
+.find-badge-attended,
+.find-badge-missed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.find-badge-info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+}
+
+.find-badge-active {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.find-badge-warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fef3c7;
+}
+
+.find-badge-attended {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.find-badge-missed {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Contextual Action Area */
+.find-context-box {
   background: #f8fafc;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 14px;
-  margin-top: 12px;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-top: 16px;
 }
 
-.find-meeting-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+.find-context-header {
   margin-bottom: 8px;
 }
 
-.find-meeting-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.find-meeting-sub {
-  font-size: 11.5px;
+.find-context-msg {
+  font-size: 13px;
   color: var(--text-muted);
-  margin: 2px 0 0 0;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.find-meeting-link-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.find-meeting-code {
-  background: var(--surface-white);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-size: 12px;
-  color: var(--dark-teal);
-  word-break: break-all;
-  flex: 1;
-  min-width: 180px;
-}
-
-.find-result-actions {
+.find-actions-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
+/* Dedicated Meeting Link Card (State B) */
+.find-meeting-link-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  margin-top: 16px;
+}
+
+.find-meeting-badge {
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+
+.find-meeting-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-headings);
+  margin: 4px 0 2px 0;
+}
+
+.find-meeting-subtitle {
+  font-size: 12.5px;
+  color: #475569;
+  margin: 0 0 12px 0;
+}
+
+.find-link-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  word-break: break-all;
+}
+
+.find-link-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--primary-teal);
+  font-weight: 600;
+}
+
+/* Multiple Matches Card */
+.find-matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.find-match-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.find-match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.find-match-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-headings);
+}
+
+.find-match-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Alert Boxes */
 .find-alert {
   display: flex;
   align-items: flex-start;

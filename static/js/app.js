@@ -624,6 +624,10 @@ window.selectQuickSlot = function (val) {
    9. FIND MY DEMO BOOKING FEATURE
    ============================================================ */
 
+/* ============================================================
+   9. FIND MY DEMO BOOKING FEATURE
+   ============================================================ */
+
 window.switchSearchMethod = function (method) {
   const hiddenType = document.getElementById("find_search_type");
   const inputEl = document.getElementById("find_search_value");
@@ -631,7 +635,10 @@ window.switchSearchMethod = function (method) {
   const hintEl = document.getElementById("findInputHint");
   const errorEl = document.getElementById("findError");
 
-  if (hiddenType) hiddenType.value = method;
+  // Canonicalize method
+  const normMethod = method === "id" ? "reference" : (method === "phone" ? "mobile" : method);
+
+  if (hiddenType) hiddenType.value = normMethod;
   if (errorEl) {
     errorEl.textContent = "";
     errorEl.style.display = "none";
@@ -639,7 +646,8 @@ window.switchSearchMethod = function (method) {
 
   // Update tabs active state
   document.querySelectorAll(".search-tab").forEach(function (tab) {
-    const isActive = tab.getAttribute("data-method") === method;
+    const tMethod = tab.getAttribute("data-method");
+    const isActive = tMethod === normMethod || (normMethod === "reference" && tMethod === "id") || (normMethod === "mobile" && tMethod === "phone");
     tab.classList.toggle("search-tab--active", isActive);
     tab.setAttribute("aria-selected", isActive ? "true" : "false");
   });
@@ -647,22 +655,22 @@ window.switchSearchMethod = function (method) {
   if (!inputEl) return;
   inputEl.classList.remove("is-invalid");
 
-  if (method === "phone") {
+  if (normMethod === "mobile" || normMethod === "phone") {
     inputEl.type = "tel";
-    inputEl.placeholder = "Enter your registered mobile number (e.g. 9876543210)";
-    if (labelEl) labelEl.innerHTML = 'Registered Mobile Number <span class="required">*</span>';
+    inputEl.placeholder = "Enter your registered mobile number";
+    if (labelEl) labelEl.innerHTML = 'Mobile Number <span class="required">*</span>';
     if (hintEl) hintEl.textContent = "Enter your 10-digit Indian mobile number (+91 or leading 0 supported).";
-  } else if (method === "email") {
+  } else if (normMethod === "email") {
     inputEl.type = "email";
-    inputEl.placeholder = "Enter your registered email address (e.g. student@example.com)";
-    if (labelEl) labelEl.innerHTML = 'Registered Email Address <span class="required">*</span>';
+    inputEl.placeholder = "Enter your registered email address";
+    if (labelEl) labelEl.innerHTML = 'Email Address <span class="required">*</span>';
     if (hintEl) hintEl.textContent = "The email address you provided during student enquiry registration.";
   } else {
-    // default: id
+    // default: reference
     inputEl.type = "text";
-    inputEl.placeholder = "Enter your reference ID (e.g. 1 or #1)";
-    if (labelEl) labelEl.innerHTML = 'Booking / Enquiry Reference ID <span class="required">*</span>';
-    if (hintEl) hintEl.textContent = "Accepts your Demo Booking Reference ID or Student Enquiry Lead ID.";
+    inputEl.placeholder = "Enter your enquiry or booking reference";
+    if (labelEl) labelEl.innerHTML = 'Enquiry / Booking Reference <span class="required">*</span>';
+    if (hintEl) hintEl.textContent = "Use your registered Enquiry Reference ID (e.g. 1) or Booking Reference.";
   }
   inputEl.focus();
 };
@@ -675,6 +683,7 @@ window.clearFindBooking = function () {
   if (inputEl) {
     inputEl.value = "";
     inputEl.classList.remove("is-invalid");
+    inputEl.focus();
   }
   if (errorEl) {
     errorEl.textContent = "";
@@ -689,7 +698,7 @@ window.clearFindBooking = function () {
 window.findBookingHandler = function (event) {
   if (event) event.preventDefault();
 
-  const type = document.getElementById("find_search_type")?.value || "id";
+  const type = document.getElementById("find_search_type")?.value || "reference";
   const inputEl = document.getElementById("find_search_value");
   const val = (inputEl?.value || "").trim();
   const errorEl = document.getElementById("findError");
@@ -711,8 +720,8 @@ window.findBookingHandler = function (event) {
     return false;
   }
 
-  // Client-side quick checks
-  if (type === "phone") {
+  // Client-side quick check
+  if (type === "mobile" || type === "phone") {
     const cleaned = val.replace(/[\s\-\.\(\)]/g, "");
     if (cleaned.length < 10) {
       if (errorEl) {
@@ -756,19 +765,23 @@ window.findBookingHandler = function (event) {
     .then(function (res) {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Booking';
+        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Details';
       }
 
       if (!resultArea) return;
       resultArea.style.display = "block";
 
-      if (res.data.not_found) {
+      // State E: Not found
+      if (res.data.not_found || res.data.state === "not_found") {
         resultArea.innerHTML = `
           <div class="find-alert find-alert--warning" role="alert">
             <span class="find-alert-icon">⚠️</span>
             <div class="find-alert-body">
-              <strong>No Matching Record Found</strong>
-              <p>${escapeHtml(res.data.message || "We couldn't find a matching record. Please check your details and try again.")}</p>
+              <strong>${escapeHtml(res.data.title || "We couldn't find your record.")}</strong>
+              <p>${escapeHtml(res.data.message || "Check the details you entered and try again, or contact KMIE administration for assistance.")}</p>
+              <div style="margin-top: 10px;">
+                <button type="button" class="btn btn--xs btn--outline" onclick="clearFindBooking()">🔍 Search Again</button>
+              </div>
             </div>
           </div>
         `;
@@ -786,137 +799,186 @@ window.findBookingHandler = function (event) {
         return;
       }
 
-      // Render retrieved card
-      const d = res.data.data;
-      const hasBooking = res.data.has_booking;
-
-      let bookingDetailsHtml = "";
-      if (hasBooking) {
-        bookingDetailsHtml = `
-          <div class="find-details-grid">
-            <div class="find-item">
-              <span class="find-label">Student Name</span>
-              <strong class="find-value">${escapeHtml(d.student_name)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Masked Phone</span>
-              <strong class="find-value">${escapeHtml(d.phone_masked)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Masked Email</span>
-              <strong class="find-value">${escapeHtml(d.email_masked)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Enquiry Ref ID</span>
-              <strong class="find-value">Lead #${d.lead_id}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Booking Ref ID</span>
-              <strong class="find-value">Booking #${d.booking_id}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Demo Date</span>
-              <strong class="find-value">${escapeHtml(d.demo_date_formatted || d.demo_date)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Demo Time Slot</span>
-              <strong class="find-value text-teal">${escapeHtml(d.slot_time_display || d.slot_time)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Target / Course</span>
-              <strong class="find-value">${escapeHtml(d.exam_goal || 'NEET/JEE')} • ${escapeHtml(d.interested_course || '')}</strong>
-            </div>
-            <div class="find-item find-item--full">
-              <span class="find-label">Booking Status:</span>
-              <span class="badge ${d.booking_status === 'Booked' ? 'badge--synced' : 'badge--attended'}">${escapeHtml(d.booking_status)}</span>
-              <span class="sync-tag sync-tag--${d.sheet_sync_status}">Sheet Sync: ${escapeHtml(d.sheet_sync_status)}</span>
-            </div>
-          </div>
-
-          <!-- Meeting Link Box -->
-          <div class="find-meeting-box">
-            <div class="find-meeting-header">
-              <span class="find-meeting-icon">🎥</span>
-              <div>
-                <strong>Official Demo Session Classroom Link:</strong>
-                <p class="find-meeting-sub">Assessment Demonstration Link • Please join 5 minutes before your scheduled slot.</p>
+      // Multiple records state
+      if (res.data.state === "multiple_records" && Array.isArray(res.data.matches)) {
+        let matchesListHtml = res.data.matches.map(function(item) {
+          const bookingInfo = item.has_booking ? `${item.demo_date} at ${item.slot_time_display} (${item.booking_status})` : 'Enquiry Registered (No Demo Booked)';
+          return `
+            <div class="find-match-row">
+              <div class="find-match-info">
+                <strong>${escapeHtml(item.student_name)}</strong>
+                <span class="find-match-sub">Lead #${item.lead_id} • Class ${item.class_level || '11/12'} • ${escapeHtml(item.exam_goal || '')}</span>
+                <span class="find-match-status">${escapeHtml(bookingInfo)}</span>
               </div>
+              <button type="button" class="btn btn--xs btn--primary" onclick="searchBySpecificReference('${item.lead_id}')">
+                Select This Record →
+              </button>
             </div>
-            <div class="find-meeting-link-row">
-              <code class="find-meeting-code" id="retrievedMeetingUrl">${escapeHtml(d.zoom_link)}</code>
-              <button type="button" class="btn btn--xs btn--outline" onclick="copyRetrievedMeetingLink()">📋 Copy Link</button>
-            </div>
-          </div>
+          `;
+        }).join("");
 
-          <div class="find-result-actions">
-            <a href="${escapeHtml(d.zoom_link)}" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
-              <span class="btn-icon">🚀</span> Open Meeting Link
-            </a>
-            <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
-              🔍 Search Again
-            </button>
+        resultArea.innerHTML = `
+          <div class="find-result-card">
+            <div class="find-result-header">
+              <span class="find-badge-info">Multiple Records Found</span>
+            </div>
+            <p style="font-size: 13px; color: #475569; margin: 0 0 12px 0;">
+              ${escapeHtml(res.data.message || "Please select your specific registration below:")}
+            </p>
+            <div class="find-matches-list">${matchesListHtml}</div>
+            <div style="margin-top: 14px;">
+              <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">← Search Again</button>
+            </div>
           </div>
         `;
-      } else {
-        // Registered Enquiry, not yet booked demo!
-        bookingDetailsHtml = `
-          <div class="find-details-grid">
-            <div class="find-item">
-              <span class="find-label">Student Name</span>
-              <strong class="find-value">${escapeHtml(d.student_name)}</strong>
+        return;
+      }
+
+      // Single record rendering
+      const d = res.data.data;
+      const state = res.data.state || (res.data.has_booking ? "booking_confirmed" : "enquiry_registered");
+
+      // Shared Detail Rows
+      const studentClassText = d.class_level ? `Class ${d.class_level} • ${d.exam_goal || ''} — ${d.interested_course || ''}` : (d.interested_course || '—');
+      const bookingDateTime = d.demo_date_formatted ? `${d.demo_date_formatted} at ${d.slot_time_display || d.slot_time}` : (d.demo_date ? `${d.demo_date} at ${d.slot_time_display || d.slot_time}` : 'Not scheduled yet');
+
+      let contextualActionHtml = "";
+
+      // STATE A: Enquiry Registered, No Demo Booking
+      if (state === "enquiry_registered") {
+        contextualActionHtml = `
+          <div class="find-context-box find-context-box--info">
+            <div class="find-context-header">
+              <span class="find-badge-warning">Enquiry Registered</span>
             </div>
-            <div class="find-item">
-              <span class="find-label">Masked Phone</span>
-              <strong class="find-value">${escapeHtml(d.phone_masked)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Masked Email</span>
-              <strong class="find-value">${escapeHtml(d.email_masked)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Enquiry Ref ID</span>
-              <strong class="find-value">Lead #${d.lead_id}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Academic Goal</span>
-              <strong class="find-value">Class ${d.class_level} • ${escapeHtml(d.exam_goal)}</strong>
-            </div>
-            <div class="find-item">
-              <span class="find-label">Interested Course</span>
-              <strong class="find-value">${escapeHtml(d.interested_course || '—')}</strong>
-            </div>
-            <div class="find-item find-item--full">
-              <span class="find-label">Booking Status:</span>
-              <span class="badge badge--warning">Registered — Demo Not Yet Booked</span>
+            <p class="find-context-msg">Your enquiry is saved. Choose a date and time to schedule your demo.</p>
+            <div class="find-actions-row">
+              <button type="button" class="btn btn--primary btn--lg" onclick="activateAndBookLead(${d.lead_id}, '${escapeHtml(d.student_name)}')">
+                <span class="btn-icon">📅</span> Book My Demo
+              </button>
+              <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+                🔍 Search Again
+              </button>
             </div>
           </div>
+        `;
+      }
+      // STATE B: Demo Booking Confirmed (Meeting Link Available)
+      else if (state === "booking_confirmed") {
+        const meetingUrl = d.zoom_link;
+        contextualActionHtml = `
+          <div class="find-context-box find-context-box--success">
+            <div class="find-context-header">
+              <span class="find-badge-success">Demo Session Booked</span>
+            </div>
+            
+            <!-- Dedicated Meeting Link Card -->
+            <div class="find-meeting-link-card">
+              <h4 class="find-meeting-heading">Your Demo Meeting Link</h4>
+              <p class="find-meeting-subtitle">Use this link to join your scheduled session at the confirmed date and time.</p>
+              
+              <div class="find-meeting-box">
+                <div class="find-meeting-link-row">
+                  <code class="find-meeting-code" id="retrievedMeetingUrl">${escapeHtml(meetingUrl)}</code>
+                  <button type="button" class="btn btn--xs btn--outline" onclick="copyRetrievedMeetingLink()">📋 Copy Link</button>
+                </div>
+              </div>
 
-          <div class="find-alert find-alert--info" style="margin-top: 14px;">
-            <span class="find-alert-icon">💡</span>
-            <div class="find-alert-body">
-              <strong>Your enquiry is registered!</strong>
-              <p>You can choose your preferred demo date and time slot right now.</p>
+              <div class="find-actions-row" style="margin-top: 14px;">
+                <a href="${escapeHtml(meetingUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--lg" id="joinRetrievedMeetingBtn">
+                  <span class="btn-icon">🚀</span> Join Demo Session
+                </a>
+                <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+                  🔍 Search Again
+                </button>
+              </div>
             </div>
           </div>
+        `;
+      }
+      // STATE C: Booking Confirmed but Meeting Link Missing
+      else if (state === "booking_no_link") {
+        contextualActionHtml = `
+          <div class="find-context-box find-context-box--warning">
+            <div class="find-context-header">
+              <span class="find-badge-success">Demo Session Booked</span>
+            </div>
+            <div class="find-alert find-alert--warning" style="margin-top: 10px;">
+              <span class="find-alert-icon">ℹ️</span>
+              <div class="find-alert-body">
+                <strong>Meeting Link Notice</strong>
+                <p>Your booking is confirmed, but the meeting link is not currently available. Please contact KMIE administration.</p>
+              </div>
+            </div>
+            <div class="find-actions-row" style="margin-top: 14px;">
+              <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+                🔍 Search Again
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      // STATE D: Attended or Not Attended
+      else if (state === "booking_attended" || state === "booking_not_attended") {
+        const isAttended = state === "booking_attended";
+        const statusBadge = isAttended ? '<span class="find-badge-attended">Attended</span>' : '<span class="find-badge-missed">Not Attended</span>';
+        const statusMsg = isAttended 
+          ? "This session has been marked as Attended. Thank you for participating in the KMIE demo." 
+          : "This session was marked as Not Attended. Please contact KMIE administration if you would like to reschedule.";
 
-          <div class="find-result-actions" style="margin-top: 18px;">
-            <button type="button" class="btn btn--primary btn--lg" onclick="activateAndBookLead(${d.lead_id}, '${escapeHtml(d.student_name)}')">
-              <span class="btn-icon">📅</span> Book My Demo
-            </button>
-            <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
-              🔍 Search Again
-            </button>
+        contextualActionHtml = `
+          <div class="find-context-box">
+            <div class="find-context-header">
+              ${statusBadge}
+            </div>
+            <p class="find-context-msg">${escapeHtml(statusMsg)}</p>
+            <div class="find-actions-row" style="margin-top: 14px;">
+              <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+                🔍 Search Again
+              </button>
+            </div>
           </div>
         `;
       }
 
+      // Assemble 3-part layout: Details Grid + Contextual Action Area
       resultArea.innerHTML = `
         <div class="find-result-card">
           <div class="find-result-header">
-            <span class="find-badge-success">✓ Record Found</span>
-            <span class="find-header-lead">Lead #${d.lead_id}</span>
+            <span class="find-record-title">Appointment &amp; Enquiry Details</span>
+            <span class="find-header-ref">Ref #${d.lead_id}</span>
           </div>
-          ${bookingDetailsHtml}
+
+          <!-- Responsive Two-Column Detail Layout -->
+          <div class="find-details-grid">
+            <div class="find-item">
+              <span class="find-label">Student Name</span>
+              <strong class="find-value">${escapeHtml(d.student_name)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Enquiry Reference</span>
+              <strong class="find-value">Lead #${d.lead_id}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Mobile</span>
+              <strong class="find-value">${escapeHtml(d.phone_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Email</span>
+              <strong class="find-value">${escapeHtml(d.email_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Class &amp; Course</span>
+              <strong class="find-value">${escapeHtml(studentClassText)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Demo Date &amp; Time</span>
+              <strong class="find-value text-teal">${escapeHtml(bookingDateTime)}</strong>
+            </div>
+          </div>
+
+          <!-- Contextual Action Area -->
+          ${contextualActionHtml}
         </div>
       `;
 
@@ -925,7 +987,7 @@ window.findBookingHandler = function (event) {
     .catch(function (err) {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Booking';
+        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Details';
       }
       if (resultArea) {
         resultArea.style.display = "block";
@@ -942,6 +1004,13 @@ window.findBookingHandler = function (event) {
     });
 
   return false;
+};
+
+window.searchBySpecificReference = function (refId) {
+  switchSearchMethod("reference");
+  const inputEl = document.getElementById("find_search_value");
+  if (inputEl) inputEl.value = refId;
+  findBookingHandler();
 };
 
 window.copyRetrievedMeetingLink = function () {
