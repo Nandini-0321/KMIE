@@ -11,7 +11,7 @@
   </div>
 
   <!-- ================================================================
-       1. HERO SECTION (Centred, Welcoming, Compact Spacing)
+       HERO SECTION (Centred, Welcoming, Compact Spacing)
   ================================================================ -->
   <header class="hero-section">
     <div class="hero-badge">
@@ -25,26 +25,21 @@
   </header>
 
   <!-- ================================================================
-       2. DEMO BOOKING INFORMATION CARD (Find Your Demo Class)
+       1ST: STUDENT ENQUIRY FORM CARD
   ================================================================ -->
-  <section class="portal-card demo-booking-card" id="booking-form" aria-labelledby="booking-heading">
-    <div class="card-badge-row">
-      <span class="status-badge status-badge--mint">
-        <span class="status-dot"></span> Demo Booking Available
-      </span>
-    </div>
+  <section class="portal-card enquiry-card" id="enquiry-form" aria-labelledby="enquiry-heading">
     <div class="section-header">
-      <h2 class="section-title" id="booking-heading">Find Your Demo Class</h2>
+      <h2 class="section-title" id="enquiry-heading">Student Enquiry Form</h2>
       <p class="section-subtitle">
-        Select a suitable date and available slot to experience our proven teaching methodology.
+        Fill in your details so our team can guide you towards the right course.
       </p>
     </div>
 
-    {% include "partials/booking_form.html" %}
+    {% include "partials/enquiry_form.html" %}
   </section>
 
   <!-- ================================================================
-       3. LIVE DEMO SESSION ACCESS CARD (For booked students)
+       2ND: BOOKED DEMO SESSION ACCESS CARD (For already booked students)
   ================================================================ -->
   <section class="portal-card demo-access-card" aria-labelledby="demo-access-heading">
     <div class="card-badge-row">
@@ -96,21 +91,26 @@
   </section>
 
   <!-- ================================================================
-       4. STUDENT ENQUIRY FORM CARD
+       3RD: BOOK YOUR DEMO CLASS CARD (Find Your Demo Class)
   ================================================================ -->
-  <section class="portal-card enquiry-card" id="enquiry-form" aria-labelledby="enquiry-heading">
+  <section class="portal-card demo-booking-card" id="booking-form" aria-labelledby="booking-heading">
+    <div class="card-badge-row">
+      <span class="status-badge status-badge--mint">
+        <span class="status-dot"></span> Demo Booking Available
+      </span>
+    </div>
     <div class="section-header">
-      <h2 class="section-title" id="enquiry-heading">Student Enquiry Form</h2>
+      <h2 class="section-title" id="booking-heading">Find Your Demo Class</h2>
       <p class="section-subtitle">
-        Fill in your details so our team can guide you towards the right course.
+        Select a suitable date and available slot to experience our proven teaching methodology.
       </p>
     </div>
 
-    {% include "partials/enquiry_form.html" %}
+    {% include "partials/booking_form.html" %}
   </section>
 
   <!-- ================================================================
-       5. WHY LEARN WITH KMIE? (Learning Benefits Section)
+       4TH: WHY LEARN WITH KMIE? (Learning Benefits Section)
   ================================================================ -->
   <section class="portal-card benefits-card" aria-labelledby="benefits-heading">
     <div class="section-header">
