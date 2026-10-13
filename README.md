@@ -1,15 +1,19 @@
 # KMIE Student Enquiry & Demo Booking Automation System
 
-[![Test Suite: 114 Passed](https://img.shields.io/badge/pytest-114%20passed-success)](https://github.com/)
+[![Deploy Status: Live on Render](https://img.shields.io/badge/Render-Live%20Deployment-brightgreen)](https://kmie-student-enquiry.onrender.com)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Nandini--0321%2FKMIE-blue?logo=github)](https://github.com/Nandini-0321/KMIE)
+[![Test Suite: 114 Passed](https://img.shields.io/badge/pytest-114%20passed-success)](https://github.com/Nandini-0321/KMIE)
 [![Python: 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![Database: SQLite](https://img.shields.io/badge/database-SQLite%203-lightgrey)](https://www.sqlite.org/)
 [![Sync: Google Sheets](https://img.shields.io/badge/sync-Google%20Sheets%20API-green)](https://developers.google.com/sheets/api)
-[![UI: Fully Responsive](https://img.shields.io/badge/responsive-320px%20to%201920px%2B-teal)](https://github.com/)
+[![UI: Fully Responsive](https://img.shields.io/badge/responsive-320px%20to%201920px%2B-teal)](https://kmie-student-enquiry.onrender.com)
 
 **Organization:** Komali Mam Institute of Excellence (KMIE)  
 **Project:** Assessment Practical Task — Student Enquiry & Demo Booking Automation System  
 **Role:** Software Developer & Automation Intern  
 **Candidate:** Nandini R  
+**Live Application URL:** [https://kmie-student-enquiry.onrender.com](https://kmie-student-enquiry.onrender.com)  
+**GitHub Repository:** [https://github.com/Nandini-0321/KMIE](https://github.com/Nandini-0321/KMIE)  
 
 ---
 
