@@ -1,0 +1,115 @@
+<!-- partials/enquiry_form.html -->
+<form
+  id="enquiryForm"
+  action="{{ url_for('submit_enquiry_route') }}"
+  method="POST"
+  novalidate
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+  <!-- Honeypot anti-spam field (hidden from legitimate users) -->
+  <div style="display:none;" aria-hidden="true">
+    <input type="text" name="website_url" tabindex="-1" autocomplete="off"/>
+  </div>
+
+  <div class="form-grid">
+
+    <!-- Student Name -->
+    <div class="form-group">
+      <label class="form-label" for="student_name">Student Name <span class="required">*</span></label>
+      <input
+        class="form-control"
+        type="text"
+        id="student_name"
+        name="student_name"
+        placeholder="e.g. Aarav Sharma"
+        maxlength="100"
+        required
+        autocomplete="name"
+      />
+      <span class="form-error" id="err-student_name"></span>
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group">
+      <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+      <input
+        class="form-control"
+        type="tel"
+        id="phone"
+        name="phone"
+        placeholder="e.g. 9876543210 or +91 98765 43210"
+        maxlength="20"
+        required
+        autocomplete="tel"
+      />
+      <span class="form-hint">Standard 10-digit Indian mobile number (+91 or 0 prefix accepted).</span>
+      <span class="form-error" id="err-phone"></span>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+      <input
+        class="form-control"
+        type="email"
+        id="email"
+        name="email"
+        placeholder="student@example.com"
+        maxlength="150"
+        required
+        autocomplete="email"
+      />
+      <span class="form-error" id="err-email"></span>
+    </div>
+
+    <!-- Class Level -->
+    <div class="form-group">
+      <label class="form-label" for="class_level">Class <span class="required">*</span></label>
+      <select class="form-control form-select" id="class_level" name="class_level" required>
+        <option value="">— Select Class —</option>
+        <option value="11">Class 11</option>
+        <option value="12">Class 12</option>
+      </select>
+      <span class="form-error" id="err-class_level"></span>
+    </div>
+
+    <!-- Exam Goal -->
+    <div class="form-group">
+      <label class="form-label" for="exam_goal">Exam Goal <span class="required">*</span></label>
+      <select class="form-control form-select" id="exam_goal" name="exam_goal" required>
+        <option value="">— Select Exam Goal —</option>
+        <option value="NEET">NEET</option>
+        <option value="JEE">JEE</option>
+      </select>
+      <span class="form-error" id="err-exam_goal"></span>
+    </div>
+
+    <!-- Interested Course -->
+    <div class="form-group">
+      <label class="form-label" for="interested_course">Interested Course <span class="required">*</span></label>
+      <select class="form-control form-select" id="interested_course" name="interested_course" required>
+        <option value="">— Select Course Offering —</option>
+        <option value="NEET Long-Term Preparation">NEET Long-Term Preparation</option>
+        <option value="NEET Crash Course">NEET Crash Course</option>
+        <option value="JEE Main Preparation">JEE Main Preparation</option>
+        <option value="JEE Advanced Preparation">JEE Advanced Preparation</option>
+        <option value="Foundation Course">Foundation Course</option>
+        <option value="Other">Other</option>
+      </select>
+      <span class="form-error" id="err-interested_course"></span>
+    </div>
+
+  </div><!-- .form-grid -->
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn--primary" id="submitEnquiryBtn">
+      <span class="btn-icon">📤</span>
+      Submit Enquiry
+    </button>
+    <button type="reset" class="btn btn--ghost" onclick="clearEnquiryErrors()">
+      Clear Form
+    </button>
+  </div>
+
+</form>

@@ -1,0 +1,98 @@
+<!-- partials/booking_table.html -->
+{% if bookings %}
+<div class="table-wrapper">
+  <table class="data-table" id="bookingsTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Booking ID</th>
+        <th>Student Name</th>
+        <th>Exam Goal</th>
+        <th>Demo Date</th>
+        <th>Time Slot</th>
+        <th>Meeting Link</th>
+        <th>Status</th>
+        <th>Update Status</th>
+        <th>Booked At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bk in bookings %}
+      <tr id="booking-row-{{ bk.id }}">
+        <td class="td-num">{{ loop.index }}</td>
+        <td>
+          <code class="lead-id" title="Booking ID #{{ bk.id }}">
+            #{{ bk.id }}
+          </code>
+        </td>
+        <td class="td-name">{{ bk.student_name }}</td>
+        <td>
+          <span class="badge badge--{% if bk.exam_goal == 'NEET' %}neet{% else %}jee{% endif %}">
+            {{ bk.exam_goal }}
+          </span>
+        </td>
+        <td class="td-date">{{ bk.demo_date }}</td>
+        <td>
+          <span class="time-badge">{{ bk.demo_time }}</span>
+        </td>
+        <td>
+          <a
+            href="{{ bk.zoom_link }}"
+            class="zoom-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Placeholder link — not a real meeting"
+          >🔗 Join (Demo)</a>
+        </td>
+        <td>
+          <span class="status-badge status--{{ bk.status | lower | replace(' ', '-') }}">
+            {{ bk.status }}
+          </span>
+        </td>
+        <td>
+          <form
+            action="{{ url_for('update_status_route') }}"
+            method="POST"
+            class="status-form"
+            id="status-form-{{ bk.id }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="booking_id" value="{{ bk.id }}" />
+            <div class="status-update-row">
+              <select
+                name="status"
+                class="form-control form-select status-select"
+                id="status-select-{{ bk.id }}"
+                aria-label="Update status for booking #{{ bk.id }}"
+              >
+                <option value="Booked"       {% if bk.status == 'Booked'       %}selected{% endif %}>Booked</option>
+                <option value="Attended"     {% if bk.status == 'Attended'     %}selected{% endif %}>Attended</option>
+                <option value="Not Attended" {% if bk.status == 'Not Attended' %}selected{% endif %}>Not Attended</option>
+              </select>
+              <button
+                type="submit"
+                class="btn btn--xs btn--save"
+                id="save-status-{{ bk.id }}"
+                title="Save status"
+              >Save</button>
+            </div>
+          </form>
+        </td>
+        <td class="td-date">
+          {% if bk.created_at %}
+            {{ (bk.created_at|string)[:19] | replace("T", " ") }}
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📅</div>
+  <h3 class="empty-title">No Demo Bookings Yet</h3>
+  <p class="empty-text">Use the booking form above to schedule a demo session.</p>
+  <a href="#booking-form" class="btn btn--secondary">Book a Demo</a>
+</div>
+{% endif %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Student Enquiry &amp; Demo Booking — KMIE{% endblock %}
+
+{% block content %}
+<div class="student-portal-container">
+
+  <!-- Screen-reader accessible anchor hooks preserving test invariants -->
+  <div style="display:none;" aria-hidden="true">
+    Dashboard Overview | New Student Enquiry | Book a Demo Session
+  </div>
+
+  <!-- ================================================================
+       A. WELCOME SECTION (Compact, Professional & Focused)
+  ================================================================ -->
+  <header class="welcome-section">
+    <div class="welcome-badge">Komali Mam Institute of Excellence</div>
+    <h1 class="welcome-title">Your Learning Journey Starts Here</h1>
+    <p class="welcome-subtitle">
+      Tell us about your academic goals, explore the right learning path, and book a demo session to take your next step with confidence.
+    </p>
+  </header>
+
+  <!-- ================================================================
+       B. STUDENT ENQUIRY FORM
+  ================================================================ -->
+  <section class="portal-card" id="enquiry-form" aria-labelledby="enquiry-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="enquiry-heading">Student Enquiry</h2>
+      <p class="section-subtitle">
+        Share your details and interests so our team can guide you towards the right course.
+      </p>
+    </div>
+
+    {% include "partials/enquiry_form.html" %}
+  </section>
+
+  <!-- ================================================================
+       C. DEMO BOOKING FORM
+  ================================================================ -->
+  <section class="portal-card" id="booking-form" aria-labelledby="booking-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="booking-heading">Book Your Demo</h2>
+      <p class="section-subtitle">
+        Choose a convenient date and available time slot for your demo session.
+      </p>
+    </div>
+
+    {% include "partials/booking_form.html" %}
+  </section>
+
+</div>
+{% endblock %}

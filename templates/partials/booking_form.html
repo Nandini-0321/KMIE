@@ -1,0 +1,77 @@
+<!-- partials/booking_form.html -->
+<form
+  id="bookingForm"
+  action="{{ url_for('create_booking_route') }}"
+  method="POST"
+  novalidate
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+  <div class="form-grid">
+
+    <!-- Lead selector -->
+    <div class="form-group form-group--full">
+      <label class="form-label" for="lead_id">Select Student Lead <span class="required">*</span></label>
+      <select class="form-control form-select" id="lead_id" name="lead_id" required>
+        <option value="">— Choose a Registered Student —</option>
+        {% for enq in enquiries %}
+        <option value="{{ enq.id }}">
+          #{{ enq.id }} — {{ enq.student_name }} ({{ enq.phone }}) [{{ enq.exam_goal }}]
+        </option>
+        {% endfor %}
+      </select>
+      {% if not enquiries %}
+      <span class="form-hint">⚠️ No student leads registered yet. Submit an enquiry first.</span>
+      {% endif %}
+      <span class="form-error" id="err-lead_id"></span>
+    </div>
+
+    <!-- Demo date -->
+    <div class="form-group">
+      <label class="form-label" for="demo_date">Demo Date <span class="required">*</span></label>
+      <input
+        class="form-control"
+        type="date"
+        id="demo_date"
+        name="demo_date"
+        required
+      />
+      <span class="form-hint">Must be today or a future date (Asia/Kolkata timezone).</span>
+      <span class="form-error" id="err-demo_date"></span>
+    </div>
+
+    <!-- Time slot (Internal 24h values, displayed in 12h AM/PM) -->
+    <div class="form-group">
+      <label class="form-label" for="slot_time">Demo Time Slot <span class="required">*</span></label>
+      <select class="form-control form-select" id="slot_time" name="slot_time" required>
+        <option value="">— Select a Time Slot —</option>
+        <option value="13:00">1:00 PM (IST)</option>
+        <option value="15:00">3:00 PM (IST)</option>
+        <option value="17:00">5:00 PM (IST)</option>
+        <option value="19:00">7:00 PM (IST)</option>
+      </select>
+      <span class="form-error" id="err-slot_time"></span>
+    </div>
+
+  </div><!-- .form-grid -->
+
+  <div class="zoom-notice">
+    <span class="zoom-icon">🎥</span>
+    <div>
+      <strong>Demo Meeting Link (Placeholder):</strong>
+      <code>https://zoom.us/j/DEMO-PLACEHOLDER</code>
+      <p class="zoom-note">The meeting link is for assessment demonstration purposes.</p>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn--secondary" id="submitBookingBtn">
+      <span class="btn-icon">📅</span>
+      Confirm Demo Booking
+    </button>
+    <button type="reset" class="btn btn--ghost">
+      Clear
+    </button>
+  </div>
+
+</form>

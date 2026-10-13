@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — KMIE Management Portal{% endblock %}
+
+{% block content %}
+<div class="admin-shell">
+
+  <!-- ================================================================
+       MOBILE SIDEBAR TOGGLE BUTTON
+  ================================================================ -->
+  <button
+    type="button"
+    class="mobile-sidebar-toggle"
+    id="mobileSidebarToggle"
+    aria-expanded="false"
+    aria-controls="adminSidebar"
+  >
+    <span>☰</span>
+    <span>Dashboard Navigation</span>
+  </button>
+
+  <!-- ================================================================
+       SIDEBAR (260px, Clean, Top-Aligned)
+  ================================================================ -->
+  <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin Dashboard Menu">
+    <div class="admin-sidebar-brand">
+      <div class="brand-logo-badge" style="width: 36px; height: 36px; font-size: 18px;">
+        <span>🎓</span>
+      </div>
+      <div>
+        <div style="font-weight: 700; font-size: 14px; color: var(--text-main); line-height: 1.2;">KMIE Admin</div>
+        <div style="font-size: 11px; color: var(--text-muted);">Management Console</div>
+      </div>
+    </div>
+
+    <ul class="admin-sidebar-nav">
+      <li>
+        <a href="#dashboard-overview" class="admin-sidebar-link active">
+          <span>📊</span>
+          <span>Dashboard Overview</span>
+        </a>
+      </li>
+      <li>
+        <a href="#enquiries-filters" class="admin-sidebar-link">
+          <span>📋</span>
+          <span>Student Enquiries</span>
+        </a>
+      </li>
+      <li>
+        <a href="#leads-table" class="admin-sidebar-link">
+          <span>📅</span>
+          <span>Demo Bookings</span>
+        </a>
+      </li>
+      <li>
+        <a href="#sync-status-panel" class="admin-sidebar-link">
+          <span>🔄</span>
+          <span>Sync Status</span>
+        </a>
+      </li>
+      <li style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+        <a href="{{ url_for('index') }}" class="admin-sidebar-link">
+          <span>🌐</span>
+          <span>View Student Portal</span>
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('admin_logout') }}" class="admin-sidebar-link admin-sidebar-link--logout">
+          <span>🚪</span>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ================================================================
+       MAIN DASHBOARD AREA (Flexible Width, Compact & Aligned)
+  ================================================================ -->
+  <div class="admin-main-area">
+
+    <!-- 1. COMPACT PAGE HEADING & TOP ACTIONS -->
+    <div class="admin-topbar">
+      <div>
+        <h1 class="admin-topbar-title">🛡️ Admin Management Console</h1>
+        <p class="admin-topbar-subtitle">Real-time control over enquiries, bookings, and Google Sheets synchronization</p>
+      </div>
+      <div class="admin-topbar-actions">
+        <form action="{{ url_for('admin_retry_sync') }}" method="POST" style="display: inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn btn--xs btn--primary" title="Trigger pending or failed Google Sheets sync">
+            <span class="btn-icon">🔄</span> Retry Sheets Sync
+          </button>
+        </form>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn--xs btn--ghost">
+          <span class="btn-icon">🚪</span> Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- 2. FOUR SUMMARY CARDS IN ONE ROW ON DESKTOP -->
+    <section id="dashboard-overview" aria-label="Dashboard Statistics Overview">
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon-wrap" style="color: var(--primary);">📋</div>
+          <div>
+            <div class="admin-stat-number">{{ stats.total_enquiries }}</div>
+            <div class="admin-stat-label">Total Enquiries</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon-wrap" style="color: #2563EB;">📅</div>
+          <div>
+            <div class="admin-stat-number">{{ stats.total_bookings }}</div>
+            <div class="admin-stat-label">Total Demo Bookings</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon-wrap" style="color: #D97706;">🕐</div>
+          <div>
+            <div class="admin-stat-number">{{ stats.booked }}</div>
+            <div class="admin-stat-label">Pending Bookings</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon-wrap" style="color: #15803D;">✅</div>
+          <div>
+            <div class="admin-stat-number">{{ stats.attended }}</div>
+            <div class="admin-stat-label">Confirmed Bookings</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. COMPACT GOOGLE SHEETS SYNCHRONIZATION STATUS PANEL -->
+    <section id="sync-status-panel" class="admin-sync-panel">
+      <div class="sync-panel-info">
+        <span style="font-weight: 600; font-size: 13px; color: var(--text-main);">Google Sheets Sync:</span>
+        {% if stats.total_enquiries == stats.sheet_synced and stats.total_enquiries > 0 %}
+          <span class="badge badge--synced">✅ Synced ({{ stats.sheet_synced }}/{{ stats.total_enquiries }})</span>
+        {% elif stats.sheet_synced > 0 %}
+          <span class="badge badge--pending">⏳ Partially Synced ({{ stats.sheet_synced }}/{{ stats.total_enquiries }})</span>
+        {% else %}
+          <span class="badge badge--pending">⚠️ Pending Sync</span>
+        {% endif %}
+        <span style="font-size: 12px; color: var(--text-muted); margin-left: 6px;">
+          (Synced: <strong>{{ stats.sheet_synced }}</strong> &nbsp;|&nbsp; Unsynced: <strong>{{ stats.total_enquiries - stats.sheet_synced }}</strong>)
+        </span>
+      </div>
+      <div>
+        <form action="{{ url_for('admin_retry_sync') }}" method="POST" style="display: inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn btn--xs btn--outline">
+            🔄 Trigger Sync Now
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 4. SEARCH & FILTER CONTROLS IN ONE ROW ON DESKTOP -->
+    <section id="enquiries-filters" class="admin-filter-bar">
+      <form method="GET" action="{{ url_for('admin_dashboard') }}">
+        <div class="admin-filter-grid">
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" for="search" style="font-size: 12px;">Search Leads</label>
+            <input
+              class="form-control"
+              type="text"
+              id="search"
+              name="search"
+              placeholder="Name, Phone, or Email..."
+              value="{{ search_query }}"
+              style="height: 38px;"
+            />
+          </div>
+
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" for="class_filter" style="font-size: 12px;">Class</label>
+            <select class="form-control form-select" id="class_filter" name="class_filter" style="height: 38px;">
+              <option value="">All Classes</option>
+              <option value="11" {% if class_filter == '11' %}selected{% endif %}>Class 11</option>
+              <option value="12" {% if class_filter == '12' %}selected{% endif %}>Class 12</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" for="goal_filter" style="font-size: 12px;">Exam Goal</label>
+            <select class="form-control form-select" id="goal_filter" name="goal_filter" style="height: 38px;">
+              <option value="">All Goals</option>
+              <option value="NEET" {% if goal_filter == 'NEET' %}selected{% endif %}>NEET</option>
+              <option value="JEE" {% if goal_filter == 'JEE' %}selected{% endif %}>JEE</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn--primary" style="height: 38px;">
+              Filter
+            </button>
+            {% if search_query or class_filter or goal_filter %}
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn--ghost" style="height: 38px;">Reset</a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- 5. STUDENT LEADS & DEMO SCHEDULES TABLE -->
+    <section id="leads-table">
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <h2 class="table-card-title">📋 Student Leads &amp; Demo Schedules</h2>
+            <p class="table-card-subtitle">{{ leads|length }} student record(s) found</p>
+          </div>
+        </div>
+
+        {% if leads %}
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Lead ID</th>
+                <th>Student Details</th>
+                <th>Class &amp; Goal</th>
+                <th>Interested Course</th>
+                <th>Scheduled Demo</th>
+                <th>Booking Status</th>
+                <th>Sheets Sync</th>
+                <th>Manage Demo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lead in leads %}
+              {% set bk = bookings_by_lead.get(lead.id) %}
+              <tr>
+                <td>
+                  <code class="lead-id">#{{ lead.id }}</code>
+                </td>
+                <td>
+                  <div style="font-weight: 600; color: var(--text-main);">{{ lead.student_name }}</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">📞 {{ lead.phone }}</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">✉️ {{ lead.email }}</div>
+                </td>
+                <td>
+                  <span class="badge badge--class">Class {{ lead.class_level }}</span>
+                  <span class="badge badge--{% if lead.exam_goal == 'NEET' %}neet{% else %}jee{% endif %}" style="margin-top: 4px; display: inline-block;">
+                    {{ lead.exam_goal }}
+                  </span>
+                </td>
+                <td>
+                  <span style="font-size: 13px;">{{ lead.interested_course }}</span>
+                </td>
+                <td>
+                  {% if bk %}
+                    <div style="font-weight: 600; font-size: 13px; color: var(--primary);">📅 {{ bk.demo_date }}</div>
+                    <div style="font-size: 12px;"><span class="time-badge">{{ bk.demo_time }}</span></div>
+                    <div style="margin-top: 4px;">
+                      <a href="{{ bk.zoom_link }}" class="zoom-link" target="_blank" rel="noopener noreferrer">🔗 Zoom Link</a>
+                    </div>
+                  {% else %}
+                    <span style="color: var(--text-light); font-style: italic; font-size: 13px;">No Booking</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if bk %}
+                    <form action="{{ url_for('admin_update_booking_status') }}" method="POST" class="status-form">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                      <input type="hidden" name="booking_id" value="{{ bk.id }}"/>
+                      <div class="status-update-row">
+                        <select name="status" class="form-control form-select status-select">
+                          <option value="Booked" {% if bk.booking_status == 'Booked' %}selected{% endif %}>Booked</option>
+                          <option value="Attended" {% if bk.booking_status == 'Attended' %}selected{% endif %}>Attended</option>
+                          <option value="Not Attended" {% if bk.booking_status == 'Not Attended' %}selected{% endif %}>Not Attended</option>
+                        </select>
+                        <button type="submit" class="btn btn--xs btn--save">Save</button>
+                      </div>
+                    </form>
+                  {% else %}
+                    <span style="color: var(--text-light); font-size: 13px;">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge badge--{% if lead.sheet_sync_status == 'synced' %}synced{% elif lead.sheet_sync_status == 'pending' %}pending{% else %}error{% endif %}">
+                    {{ lead.sheet_sync_status|upper }}
+                  </span>
+                  {% if lead.sheet_sync_error %}
+                  <div style="font-size: 10px; color: var(--error-text); margin-top: 2px;" title="{{ lead.sheet_sync_error }}">Sync Issue</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <!-- Quick Reschedule / Book Slot Form -->
+                  <details class="reschedule-dropdown">
+                    <summary class="btn btn--xs btn--ghost" style="list-style: none; cursor: pointer;">
+                      {% if bk %}🔄 Reschedule{% else %}➕ Book Demo{% endif %}
+                    </summary>
+                    <div class="reschedule-popover card">
+                      <form action="{{ url_for('admin_schedule_booking') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="lead_id" value="{{ lead.id }}"/>
+                        <div class="form-group">
+                          <label class="form-label" style="font-size: 12px;">Demo Date</label>
+                          <input class="form-control" type="date" name="demo_date" required style="font-size: 13px; height: 36px;"/>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                          <label class="form-label" style="font-size: 12px;">Slot Time</label>
+                          <select class="form-control form-select" name="slot_time" required style="font-size: 13px; height: 36px;">
+                            <option value="13:00">1:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                            <option value="19:00">7:00 PM</option>
+                          </select>
+                        </div>
+                        <button type="submit" class="btn btn--xs btn--primary" style="margin-top: 12px; width: 100%; justify-content: center;">
+                          Confirm Slot
+                        </button>
+                      </form>
+                    </div>
+                  </details>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 32px; margin-bottom: 10px;">📭</div>
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--text-main);">No matching student records found</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Try adjusting your search criteria or register leads on the Student Portal.</p>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+  </div><!-- .admin-main-area -->
+
+</div><!-- .admin-shell -->
+{% endblock %}

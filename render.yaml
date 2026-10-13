@@ -1,0 +1,23 @@
+# render.yaml — Infrastructure-as-Code Blueprint for Render Deployment
+# KMIE Student Enquiry & Demo Booking Automation System
+
+services:
+  - type: web
+    name: kmie-student-enquiry
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn wsgi:app --workers 2 --bind 0.0.0.0:$PORT"
+    healthCheckPath: "/health/live"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: database/kmie.db
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DEMO_MEETING_URL
+        value: "https://zoom.us/j/DEMO-PLACEHOLDER"

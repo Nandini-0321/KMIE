@@ -1,0 +1,57 @@
+<!-- partials/enquiry_table.html -->
+{% if enquiries %}
+<div class="table-wrapper">
+  <table class="data-table" id="enquiriesTable">
+    <thead>
+      <tr>
+        <th>Lead ID</th>
+        <th>Student Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Class</th>
+        <th>Exam Goal</th>
+        <th>Interested Course</th>
+        <th>Submitted At (UTC)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for enq in enquiries %}
+      <tr>
+        <td>
+          <code class="lead-id" title="Lead ID #{{ enq.id }}">
+            #{{ enq.id }}
+          </code>
+        </td>
+        <td class="td-name">{{ enq.student_name }}</td>
+        <td class="td-phone">
+          {{ enq.phone }}
+          <div style="font-size: 11px; color: var(--teal-700);">{{ enq.phone_e164 }}</div>
+        </td>
+        <td class="td-email">{{ enq.email }}</td>
+        <td>
+          <span class="badge badge--class">Class {{ enq.class_level }}</span>
+        </td>
+        <td>
+          <span class="badge badge--{% if enq.exam_goal == 'NEET' %}neet{% else %}jee{% endif %}">
+            {{ enq.exam_goal }}
+          </span>
+        </td>
+        <td>{{ enq.interested_course }}</td>
+        <td class="td-date">
+          {% if enq.created_at %}
+            {{ (enq.created_at|string)[:19] | replace("T", " ") }}
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📭</div>
+  <h3 class="empty-title">No Enquiries Yet</h3>
+  <p class="empty-text">Submit the first student enquiry using the form above.</p>
+  <a href="#enquiry-form" class="btn btn--primary">Add Enquiry</a>
+</div>
+{% endif %}
