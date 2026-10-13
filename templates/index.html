@@ -1,154 +1,565 @@
 {% extends "base.html" %}
 
-{% block title %}Student Enquiry &amp; Demo Booking — KMIE{% endblock %}
+{% block title %}KMIE — Student Enquiry &amp; Demo Booking Journey{% endblock %}
 
 {% block content %}
-<div class="student-portal-container">
+<div class="student-journey-container" id="studentJourneyApp">
 
   <!-- Screen-reader accessible anchor hooks preserving test invariants -->
   <div style="display:none;" aria-hidden="true">
-    Dashboard Overview | New Student Enquiry | Book a Demo Session
+    Dashboard Overview | New Student Enquiry | Book a Demo Session | Demo Booking
   </div>
 
   <!-- ================================================================
-       HERO SECTION (Centred, Welcoming, Compact Spacing)
+       PROGRESS STEPPER (Compact, Responsive, Accessible)
+       01 Student Enquiry → 02 Book Demo → 03 Choose Slot → 04 Confirmation
   ================================================================ -->
-  <header class="hero-section">
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      ADMISSIONS 2026–2027
+  <nav class="journey-stepper" aria-label="Student Journey Progress">
+    <div class="stepper-step stepper-step--active" id="step-nav-1" data-step="1">
+      <div class="step-indicator">
+        <span class="step-num">01</span>
+        <span class="step-check">✓</span>
+      </div>
+      <div class="step-label-wrap">
+        <span class="step-tag">Step 1</span>
+        <span class="step-title">Student Enquiry</span>
+      </div>
     </div>
-    <h1 class="hero-title">Start Your Journey Towards NEET &amp; JEE Excellence</h1>
-    <p class="hero-subtitle">
-      Submit your enquiry below to connect with our academic counsellor and explore the right learning path for your goals.
-    </p>
-  </header>
+
+    <div class="stepper-line" id="line-1-2"></div>
+
+    <div class="stepper-step" id="step-nav-2" data-step="2">
+      <div class="step-indicator">
+        <span class="step-num">02</span>
+        <span class="step-check">✓</span>
+      </div>
+      <div class="step-label-wrap">
+        <span class="step-tag">Step 2</span>
+        <span class="step-title">Book Demo</span>
+      </div>
+    </div>
+
+    <div class="stepper-line" id="line-2-3"></div>
+
+    <div class="stepper-step" id="step-nav-3" data-step="3">
+      <div class="step-indicator">
+        <span class="step-num">03</span>
+        <span class="step-check">✓</span>
+      </div>
+      <div class="step-label-wrap">
+        <span class="step-tag">Step 3</span>
+        <span class="step-title">Choose Slot</span>
+      </div>
+    </div>
+
+    <div class="stepper-line" id="line-3-4"></div>
+
+    <div class="stepper-step" id="step-nav-4" data-step="4">
+      <div class="step-indicator">
+        <span class="step-num">04</span>
+        <span class="step-check">✓</span>
+      </div>
+      <div class="step-label-wrap">
+        <span class="step-tag">Step 4</span>
+        <span class="step-title">Confirmation</span>
+      </div>
+    </div>
+  </nav>
 
   <!-- ================================================================
-       1ST: STUDENT ENQUIRY FORM CARD
+       STAGE 1: STUDENT ENQUIRY
   ================================================================ -->
-  <section class="portal-card enquiry-card" id="enquiry-form" aria-labelledby="enquiry-heading">
-    <div class="section-header">
-      <h2 class="section-title" id="enquiry-heading">Student Enquiry Form</h2>
-      <p class="section-subtitle">
-        Fill in your details so our team can guide you towards the right course.
+  <section class="journey-stage journey-stage--active" id="stage-1" data-stage="1" aria-labelledby="stage1-heading">
+    <header class="journey-hero">
+      <div class="journey-hero-badge">
+        <span class="hero-icon">🎓</span>
+        <span>Welcome to KMIE • Your learning journey starts here</span>
+      </div>
+      <h1 class="journey-hero-title" id="stage1-heading">Start Your Journey Towards NEET &amp; JEE Excellence</h1>
+      <p class="journey-hero-subtitle">
+        Tell us a little about yourself. Our team will help you explore the right learning path for your goals.
       </p>
-    </div>
+    </header>
 
-    {% include "partials/enquiry_form.html" %}
-  </section>
+    <div class="portal-card enquiry-card" id="enquiry-form">
+      <div class="section-header">
+        <div class="stage-tag">Stage 01 of 04</div>
+        <h2 class="section-title">Student Enquiry Form</h2>
+        <p class="section-subtitle">
+          Please provide your contact and course details to begin your personalized counselling.
+        </p>
+      </div>
 
-  <!-- ================================================================
-       2ND: BOOKED DEMO SESSION ACCESS CARD (For already booked students)
-  ================================================================ -->
-  <section class="portal-card demo-access-card" aria-labelledby="demo-access-heading">
-    <div class="card-badge-row">
-      <span class="status-badge status-badge--mint">
-        <span class="status-dot"></span> Live Classroom Access
-      </span>
-    </div>
-    <div class="section-header">
-      <h2 class="section-title" id="demo-access-heading">Booked for a Demo Session?</h2>
-      <p class="section-subtitle">
-        If you have already booked a demo session, visit the link below to join your live interactive class.
-      </p>
-    </div>
-
-    <div class="demo-access-content">
-      <div class="demo-access-box">
-        <div class="demo-access-icon">
-          <span>🎥</span>
-        </div>
-        <div class="demo-access-details">
-          <span class="demo-access-label">Official Demo Session Link:</span>
-          <a
-            href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="demo-access-url"
-          >
-            {{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}
-          </a>
-          <p class="demo-access-hint">
-            Please join 5 minutes before your scheduled slot with audio and video enabled.
-          </p>
+      <!-- Duplicate Phone Notice Alert Box -->
+      <div class="duplicate-alert" id="duplicateAlert" style="display: none;" role="alert">
+        <span class="duplicate-alert-icon">⚠️</span>
+        <div class="duplicate-alert-body">
+          <strong id="duplicateAlertTitle">Phone Number Already Registered</strong>
+          <p id="duplicateAlertMessage"></p>
+          <button type="button" class="btn btn--xs btn--primary" id="duplicateContinueBtn" style="margin-top: 8px;">
+            Continue to Book Demo with this Student →
+          </button>
         </div>
       </div>
 
-      <div class="demo-access-action">
+      <form
+        id="enquiryForm"
+        action="{{ url_for('submit_enquiry_route') }}"
+        method="POST"
+        novalidate
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <!-- Honeypot anti-spam field -->
+        <div style="display:none;" aria-hidden="true">
+          <input type="text" name="website_url" tabindex="-1" autocomplete="off"/>
+        </div>
+
+        <div class="form-grid">
+          <!-- Student Name -->
+          <div class="form-group">
+            <label class="form-label" for="student_name">Student Name <span class="required">*</span></label>
+            <input
+              class="form-control"
+              type="text"
+              id="student_name"
+              name="student_name"
+              placeholder="e.g. Aarav Sharma"
+              maxlength="100"
+              required
+              autocomplete="name"
+              value="{{ active_lead.student_name if active_lead else '' }}"
+            />
+            <span class="form-error" id="err-student_name"></span>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+            <input
+              class="form-control"
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="e.g. 9876543210 or +91 98765 43210"
+              maxlength="20"
+              required
+              autocomplete="tel"
+              value="{{ active_lead.phone if active_lead else '' }}"
+            />
+            <span class="form-hint">Standard 10-digit Indian mobile number (+91 or 0 prefix accepted).</span>
+            <span class="form-error" id="err-phone"></span>
+          </div>
+
+          <!-- Email Address -->
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+            <input
+              class="form-control"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="student@example.com"
+              maxlength="150"
+              required
+              autocomplete="email"
+              value="{{ active_lead.email if active_lead else '' }}"
+            />
+            <span class="form-error" id="err-email"></span>
+          </div>
+
+          <!-- Class Level -->
+          <div class="form-group">
+            <label class="form-label" for="class_level">Class <span class="required">*</span></label>
+            <select class="form-control form-select" id="class_level" name="class_level" required>
+              <option value="">— Select Class —</option>
+              <option value="11" {% if active_lead and (active_lead.class_level == 11 or active_lead.class_level == '11') %}selected{% endif %}>Class 11</option>
+              <option value="12" {% if active_lead and (active_lead.class_level == 12 or active_lead.class_level == '12') %}selected{% endif %}>Class 12</option>
+            </select>
+            <span class="form-error" id="err-class_level"></span>
+          </div>
+
+          <!-- Exam Goal -->
+          <div class="form-group">
+            <label class="form-label" for="exam_goal">Exam Goal <span class="required">*</span></label>
+            <select class="form-control form-select" id="exam_goal" name="exam_goal" required>
+              <option value="">— Select Exam Goal —</option>
+              <option value="NEET" {% if active_lead and active_lead.exam_goal == 'NEET' %}selected{% endif %}>NEET</option>
+              <option value="JEE" {% if active_lead and active_lead.exam_goal == 'JEE' %}selected{% endif %}>JEE</option>
+            </select>
+            <span class="form-error" id="err-exam_goal"></span>
+          </div>
+
+          <!-- Interested Course -->
+          <div class="form-group">
+            <label class="form-label" for="interested_course">Interested Course <span class="required">*</span></label>
+            <select class="form-control form-select" id="interested_course" name="interested_course" required>
+              <option value="">— Select Course Offering —</option>
+              <option value="NEET Long-Term Preparation" {% if active_lead and active_lead.interested_course == 'NEET Long-Term Preparation' %}selected{% endif %}>NEET Long-Term Preparation</option>
+              <option value="NEET Crash Course" {% if active_lead and active_lead.interested_course == 'NEET Crash Course' %}selected{% endif %}>NEET Crash Course</option>
+              <option value="JEE Main Preparation" {% if active_lead and active_lead.interested_course == 'JEE Main Preparation' %}selected{% endif %}>JEE Main Preparation</option>
+              <option value="JEE Advanced Preparation" {% if active_lead and active_lead.interested_course == 'JEE Advanced Preparation' %}selected{% endif %}>JEE Advanced Preparation</option>
+              <option value="Foundation Course" {% if active_lead and active_lead.interested_course == 'Foundation Course' %}selected{% endif %}>Foundation Course</option>
+              <option value="Other" {% if active_lead and active_lead.interested_course == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+            <span class="form-error" id="err-interested_course"></span>
+          </div>
+        </div>
+
+        <div class="privacy-note">
+          <span class="privacy-icon">🔒</span>
+          <span><strong>Privacy Note:</strong> Your details are strictly used for academic guidance and demo session coordination.</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary" id="submitEnquiryBtn">
+            <span class="btn-icon">📤</span>
+            Submit Enquiry &amp; Continue →
+          </button>
+          <button type="reset" class="btn btn--ghost" onclick="clearEnquiryErrors()">
+            Clear Form
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Informational Learning Benefits Card -->
+    <div class="portal-card benefits-card" style="margin-top: 20px;">
+      <div class="section-header">
+        <h3 class="section-title" style="font-size: 16px;">Why Learn with KMIE?</h3>
+        <p class="section-subtitle">Dedicated faculty, structured curriculum, and personalized guidance.</p>
+      </div>
+      <div class="benefits-grid">
+        <div class="benefit-item">
+          <div class="benefit-icon-badge">✓</div>
+          <div class="benefit-text">
+            <h4 class="benefit-title">Personalized Mentorship</h4>
+            <p class="benefit-desc">Guidance tailored to each student's academic strengths and targets.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon-badge">✓</div>
+          <div class="benefit-text">
+            <h4 class="benefit-title">Comprehensive Curriculum</h4>
+            <p class="benefit-desc">Structured, rigorous preparation for NEET and JEE aspirants.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon-badge">✓</div>
+          <div class="benefit-text">
+            <h4 class="benefit-title">Free Demo Booking</h4>
+            <p class="benefit-desc">Experience our interactive teaching pedagogy before enrolling.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       STAGE 2: BOOK YOUR DEMO (Personalised Welcome Card)
+  ================================================================ -->
+  <section class="journey-stage" id="stage-2" data-stage="2" aria-labelledby="stage2-heading" style="display: none;">
+    <div class="portal-card registered-welcome-card">
+      <div class="registered-success-badge">
+        <span class="success-check-circle">✓</span>
+        <span>Registration Confirmed</span>
+      </div>
+
+      <h2 class="section-title" id="stage2-heading" style="font-size: 24px; margin-top: 10px;">
+        You're Registered! Let's Plan Your Demo.
+      </h2>
+      <p class="section-subtitle">
+        Take the next step and experience the learning environment at KMIE with a live interactive demo session.
+      </p>
+
+      <!-- Registered Student Details Summary Box -->
+      <div class="student-summary-card">
+        <div class="summary-card-header">
+          <span class="summary-lead-badge">Lead <span id="stage2-lead-id">#{{ active_lead.id if active_lead else '' }}</span></span>
+          <span class="summary-status-badge">Ready for Demo Booking</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-label">Student Name:</span>
+            <strong class="summary-value" id="stage2-student-name">{{ active_lead.student_name if active_lead else '' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Contact Phone:</span>
+            <strong class="summary-value" id="stage2-student-phone">{{ active_lead.phone if active_lead else '' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Academic Stream:</span>
+            <strong class="summary-value" id="stage2-student-class">
+              {% if active_lead %}Class {{ active_lead.class_level }} • {{ active_lead.exam_goal }}{% endif %}
+            </strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Interested Course:</span>
+            <strong class="summary-value" id="stage2-student-course">{{ active_lead.interested_course if active_lead else '' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage2-actions">
+        <button type="button" class="btn btn--primary btn--lg" id="proceedToSlotBtn" onclick="journeyController.goToStage(3)">
+          <span class="btn-icon">📅</span>
+          Book My Demo Class →
+        </button>
+        <button type="button" class="btn btn--ghost" onclick="journeyController.goToStage(1)">
+          ← Back to My Details
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       STAGE 3: CHOOSE YOUR DEMO SLOT
+  ================================================================ -->
+  <section class="journey-stage" id="stage-3" data-stage="3" aria-labelledby="stage3-heading" style="display: none;">
+    <div class="portal-card slot-picker-card" id="booking-form">
+      <div class="stage-tag">Stage 03 of 04</div>
+      <h2 class="section-title" id="stage3-heading">Choose a Time That Works for You</h2>
+      <p class="section-subtitle">
+        Select your preferred demo date and an available session time for <strong id="stage3-student-name">{{ active_lead.student_name if active_lead else 'your demo' }}</strong>.
+      </p>
+
+      <form
+        id="bookingForm"
+        action="{{ url_for('create_booking_route') }}"
+        method="POST"
+        novalidate
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <!-- Registered Lead ID (Set dynamically from Stage 1 / Stage 2) -->
+        <input type="hidden" id="lead_id" name="lead_id" value="{{ active_lead.id if active_lead else '' }}"/>
+
+        <!-- Invariant: Fallback select for non-JS & test environments -->
+        <div style="display: none;" aria-hidden="true">
+          <select id="lead_id_fallback" name="lead_id_fallback">
+            {% for enq in enquiries %}
+            <option value="{{ enq.id }}">#{{ enq.id }} — {{ enq.student_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <span class="form-error" id="err-lead_id"></span>
+
+        <!-- Step A: Date Picker -->
+        <div class="form-group" style="margin-top: 14px;">
+          <label class="form-label" for="demo_date">Demo Date <span class="required">*</span></label>
+          <input
+            class="form-control"
+            type="date"
+            id="demo_date"
+            name="demo_date"
+            required
+          />
+          <span class="form-hint">Must be today or a future date (Asia/Kolkata timezone).</span>
+          <span class="form-error" id="err-demo_date"></span>
+        </div>
+
+        <!-- Step B: Time Slot Selection (4 Selectable Pill Cards) -->
+        <div class="form-group" style="margin-top: 18px;">
+          <label class="form-label">Select Session Time Slot <span class="required">*</span></label>
+          <span class="form-hint">Choose one of our 4 daily interactive batch times:</span>
+
+          <!-- Actual backend-compatible select (hidden from view, kept in sync) -->
+          <select class="form-control" id="slot_time" name="slot_time" style="display: none;" required>
+            <option value="">— Select a Time Slot —</option>
+            <option value="13:00">1:00 PM (IST)</option>
+            <option value="15:00">3:00 PM (IST)</option>
+            <option value="17:00">5:00 PM (IST)</option>
+            <option value="19:00">7:00 PM (IST)</option>
+          </select>
+          <span class="form-error" id="err-slot_time"></span>
+
+          <!-- Attractive, Accessible Time Slot Cards -->
+          <div class="slot-cards-grid" role="radiogroup" aria-label="Available Demo Time Slots">
+            <button
+              type="button"
+              class="slot-card"
+              role="radio"
+              aria-checked="false"
+              data-slot="13:00"
+              onclick="journeyController.selectSlot('13:00')"
+            >
+              <div class="slot-card-icon">☀️</div>
+              <div class="slot-card-body">
+                <span class="slot-card-time">1:00 PM</span>
+                <span class="slot-card-zone">Afternoon • IST</span>
+              </div>
+              <span class="slot-card-check">✓</span>
+            </button>
+
+            <button
+              type="button"
+              class="slot-card"
+              role="radio"
+              aria-checked="false"
+              data-slot="15:00"
+              onclick="journeyController.selectSlot('15:00')"
+            >
+              <div class="slot-card-icon">🌤️</div>
+              <div class="slot-card-body">
+                <span class="slot-card-time">3:00 PM</span>
+                <span class="slot-card-zone">Afternoon • IST</span>
+              </div>
+              <span class="slot-card-check">✓</span>
+            </button>
+
+            <button
+              type="button"
+              class="slot-card"
+              role="radio"
+              aria-checked="false"
+              data-slot="17:00"
+              onclick="journeyController.selectSlot('17:00')"
+            >
+              <div class="slot-card-icon">🌇</div>
+              <div class="slot-card-body">
+                <span class="slot-card-time">5:00 PM</span>
+                <span class="slot-card-zone">Evening • IST</span>
+              </div>
+              <span class="slot-card-check">✓</span>
+            </button>
+
+            <button
+              type="button"
+              class="slot-card"
+              role="radio"
+              aria-checked="false"
+              data-slot="19:00"
+              onclick="journeyController.selectSlot('19:00')"
+            >
+              <div class="slot-card-icon">🌙</div>
+              <div class="slot-card-body">
+                <span class="slot-card-time">7:00 PM</span>
+                <span class="slot-card-zone">Evening • IST</span>
+              </div>
+              <span class="slot-card-check">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="zoom-notice" style="margin-top: 20px;">
+          <span class="zoom-icon">🎥</span>
+          <div>
+            <strong>Demo Classroom Link (Demonstration Placeholder):</strong>
+            <code>{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}</code>
+            <p class="zoom-note">The session link will be confirmed immediately upon booking.</p>
+          </div>
+        </div>
+
+        <div class="form-actions" style="margin-top: 24px;">
+          <button type="submit" class="btn btn--primary btn--lg" id="submitBookingBtn">
+            <span class="btn-icon">📅</span>
+            Confirm Demo Booking
+          </button>
+          <button type="button" class="btn btn--ghost" onclick="journeyController.goToStage(2)">
+            ← Back
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       STAGE 4: BOOKING CONFIRMATION AND MEETING DETAILS
+  ================================================================ -->
+  <section class="journey-stage" id="stage-4" data-stage="4" aria-labelledby="stage4-heading" style="display: none;">
+    <div class="portal-card confirmation-card">
+      <div class="confirmation-success-badge">
+        <span class="conf-check-icon">🎉</span>
+        <span>Booking Successfully Confirmed!</span>
+      </div>
+
+      <h2 class="section-title" id="stage4-heading" style="font-size: 24px; margin-top: 10px;">
+        Your Demo Session Is Booked!
+      </h2>
+      <p class="section-subtitle">
+        Thank you for choosing KMIE. Your demo session details are confirmed and saved in our system.
+      </p>
+
+      <!-- Booking Details Card -->
+      <div class="conf-details-card">
+        <div class="conf-details-grid">
+          <div class="conf-item">
+            <span class="conf-label">Student Name</span>
+            <strong class="conf-val" id="conf-student-name">
+              {{ active_booking.student_name if active_booking else (active_lead.student_name if active_lead else '') }}
+            </strong>
+          </div>
+
+          <div class="conf-item">
+            <span class="conf-label">Demo Date</span>
+            <strong class="conf-val" id="conf-demo-date">
+              {{ active_booking.demo_date if active_booking else '' }}
+            </strong>
+          </div>
+
+          <div class="conf-item">
+            <span class="conf-label">Session Time</span>
+            <strong class="conf-val time-highlight" id="conf-slot-time">
+              {{ active_booking.slot_time if active_booking else '' }}
+            </strong>
+          </div>
+
+          <div class="conf-item">
+            <span class="conf-label">Academic Target</span>
+            <strong class="conf-val" id="conf-course">
+              {{ active_booking.exam_goal if active_booking else (active_lead.exam_goal if active_lead else 'NEET/JEE') }}
+            </strong>
+          </div>
+
+          <div class="conf-item conf-item--full">
+            <span class="conf-label">Booking Status</span>
+            <span class="badge badge--synced" id="conf-status">
+              {{ active_booking.booking_status if active_booking else 'Booked' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Meeting Classroom Link Box -->
+        <div class="conf-meeting-box">
+          <div class="meeting-box-header">
+            <span class="meeting-icon">🎥</span>
+            <div>
+              <span class="meeting-title">Official Demo Classroom Link:</span>
+              <p class="meeting-sub">Assessment Demonstration Link • Please join 5 mins before session time.</p>
+            </div>
+          </div>
+
+          <div class="meeting-link-row">
+            <code class="meeting-url" id="meetingUrlText">{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}</code>
+            <button
+              type="button"
+              class="btn btn--xs btn--outline"
+              id="copyMeetingBtn"
+              onclick="journeyController.copyMeetingLink()"
+            >
+              📋 Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="conf-actions">
         <a
           href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
           target="_blank"
           rel="noopener noreferrer"
-          class="btn btn--primary btn--demo-join"
-          id="joinDemoBtn"
+          class="btn btn--primary btn--lg"
+          id="joinDemoClassBtn"
         >
-          <span class="btn-icon">🔗</span>
-          Visit Demo Session Link
+          <span class="btn-icon">🚀</span>
+          Join Demo Session
         </a>
-      </div>
-    </div>
-  </section>
 
-  <!-- ================================================================
-       3RD: BOOK YOUR DEMO CLASS CARD (Find Your Demo Class)
-  ================================================================ -->
-  <section class="portal-card demo-booking-card" id="booking-form" aria-labelledby="booking-heading">
-    <div class="card-badge-row">
-      <span class="status-badge status-badge--mint">
-        <span class="status-dot"></span> Demo Booking Available
-      </span>
-    </div>
-    <div class="section-header">
-      <h2 class="section-title" id="booking-heading">Find Your Demo Class</h2>
-      <p class="section-subtitle">
-        Select a suitable date and available slot to experience our proven teaching methodology.
-      </p>
-    </div>
-
-    {% include "partials/booking_form.html" %}
-  </section>
-
-  <!-- ================================================================
-       4TH: WHY LEARN WITH KMIE? (Learning Benefits Section)
-  ================================================================ -->
-  <section class="portal-card benefits-card" aria-labelledby="benefits-heading">
-    <div class="section-header">
-      <h2 class="section-title" id="benefits-heading">Why Learn with KMIE?</h2>
-      <p class="section-subtitle">
-        Dedicated guidance and structured preparation to help every aspirant excel.
-      </p>
-    </div>
-
-    <div class="benefits-grid">
-      <div class="benefit-item">
-        <div class="benefit-icon-badge">
-          <span>✓</span>
-        </div>
-        <div class="benefit-text">
-          <h3 class="benefit-title">Personalized Mentorship</h3>
-          <p class="benefit-desc">Guidance aligned with each student's academic goals.</p>
-        </div>
-      </div>
-
-      <div class="benefit-item">
-        <div class="benefit-icon-badge">
-          <span>✓</span>
-        </div>
-        <div class="benefit-text">
-          <h3 class="benefit-title">Comprehensive Curriculum</h3>
-          <p class="benefit-desc">Structured preparation for NEET and JEE.</p>
-        </div>
-      </div>
-
-      <div class="benefit-item">
-        <div class="benefit-icon-badge">
-          <span>✓</span>
-        </div>
-        <div class="benefit-text">
-          <h3 class="benefit-title">Free Demo Booking</h3>
-          <p class="benefit-desc">Explore a demo session before choosing your learning path.</p>
-        </div>
+        <a href="{{ url_for('index', reset=1) }}" class="btn btn--ghost" id="startNewEnquiryBtn">
+          🔄 Start Another Enquiry
+        </a>
       </div>
     </div>
   </section>

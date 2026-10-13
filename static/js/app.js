@@ -212,7 +212,7 @@ function validateBookingForm() {
 }
 
 /* ============================================================
-   5. FORM SUBMIT HANDLERS — loading states
+   5. FORM SUBMIT HANDLERS — PROGRESSIVE ONBOARDING
    ============================================================ */
 
 function attachEnquiryForm() {
@@ -220,13 +220,87 @@ function attachEnquiryForm() {
   const btn = document.getElementById("submitEnquiryBtn");
   if (!form || !btn) return;
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", async function (e) {
     if (!validateEnquiryForm()) {
       e.preventDefault();
       return;
     }
+
+    e.preventDefault();
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true;
     btn.classList.add("loading");
-    btn.innerHTML = '<span class="spinner"></span> Submitting…';
+    btn.innerHTML = '<span class="spinner"></span> Submitting Enquiry…';
+
+    const dupAlert = document.getElementById("duplicateAlert");
+    if (dupAlert) dupAlert.style.display = "none";
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "Accept": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success && data.lead) {
+        const lead = data.lead;
+        document.getElementById("stage2-lead-id").textContent = "#" + lead.id;
+        document.getElementById("stage2-student-name").textContent = lead.student_name;
+        document.getElementById("stage2-student-phone").textContent = lead.phone;
+        document.getElementById("stage2-student-class").textContent = "Class " + lead.class_level + " • " + lead.exam_goal;
+        document.getElementById("stage2-student-course").textContent = lead.interested_course;
+
+        const leadIdInput = document.getElementById("lead_id");
+        if (leadIdInput) leadIdInput.value = lead.id;
+        const stage3Name = document.getElementById("stage3-student-name");
+        if (stage3Name) stage3Name.textContent = lead.student_name;
+
+        journeyController.goToStage(2);
+      } else if (data.duplicate && data.lead) {
+        if (dupAlert) {
+          dupAlert.style.display = "flex";
+          document.getElementById("duplicateAlertMessage").textContent = data.message;
+          const contBtn = document.getElementById("duplicateContinueBtn");
+          if (contBtn) {
+            contBtn.onclick = function () {
+              const lead = data.lead;
+              document.getElementById("stage2-lead-id").textContent = "#" + lead.id;
+              document.getElementById("stage2-student-name").textContent = lead.student_name;
+              document.getElementById("stage2-student-phone").textContent = lead.phone;
+              document.getElementById("stage2-student-class").textContent = "Class " + lead.class_level + " • " + lead.exam_goal;
+              document.getElementById("stage2-student-course").textContent = lead.interested_course;
+
+              const leadIdInput = document.getElementById("lead_id");
+              if (leadIdInput) leadIdInput.value = lead.id;
+              const stage3Name = document.getElementById("stage3-student-name");
+              if (stage3Name) stage3Name.textContent = lead.student_name;
+
+              journeyController.goToStage(2);
+            };
+          }
+        }
+      } else if (data.errors) {
+        for (const [field, msg] of Object.entries(data.errors)) {
+          showFieldError(field, msg);
+        }
+      } else {
+        alert(data.message || "An error occurred while submitting enquiry.");
+      }
+    } catch (err) {
+      console.warn("AJAX enquiry fallback to standard submit:", err);
+      form.submit();
+      return;
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove("loading");
+      btn.innerHTML = originalBtnText;
+    }
   });
 }
 
@@ -235,13 +309,65 @@ function attachBookingForm() {
   const btn = document.getElementById("submitBookingBtn");
   if (!form || !btn) return;
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", async function (e) {
     if (!validateBookingForm()) {
       e.preventDefault();
       return;
     }
+
+    e.preventDefault();
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true;
     btn.classList.add("loading");
-    btn.innerHTML = '<span class="spinner"></span> Booking…';
+    btn.innerHTML = '<span class="spinner"></span> Confirming Demo Booking…';
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "Accept": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        const booking = data.booking || {};
+        const studentName = booking.student_name || document.getElementById("stage2-student-name")?.textContent || "";
+        const demoDate = booking.demo_date || document.getElementById("demo_date")?.value || "";
+        const slotTime = booking.slot_time || document.getElementById("slot_time")?.value || "";
+
+        let slotDisplay = slotTime;
+        if (slotTime === "13:00") slotDisplay = "1:00 PM (IST)";
+        else if (slotTime === "15:00") slotDisplay = "3:00 PM (IST)";
+        else if (slotTime === "17:00") slotDisplay = "5:00 PM (IST)";
+        else if (slotTime === "19:00") slotDisplay = "7:00 PM (IST)";
+
+        document.getElementById("conf-student-name").textContent = studentName;
+        document.getElementById("conf-demo-date").textContent = demoDate;
+        document.getElementById("conf-slot-time").textContent = slotDisplay;
+        document.getElementById("conf-status").textContent = booking.booking_status || "Booked";
+
+        journeyController.goToStage(4);
+      } else if (data.errors) {
+        for (const [field, msg] of Object.entries(data.errors)) {
+          showFieldError(field, msg);
+        }
+      } else {
+        alert(data.message || "Failed to schedule demo.");
+      }
+    } catch (err) {
+      console.warn("AJAX booking fallback to standard submit:", err);
+      form.submit();
+      return;
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove("loading");
+      btn.innerHTML = originalBtnText;
+    }
   });
 }
 
@@ -394,48 +520,105 @@ function attachMobileSidebarToggle() {
 }
 
 /* ============================================================
-   8b. QUICK TIME SLOT SELECTOR
+   8b. GUIDED JOURNEY CONTROLLER
    ============================================================ */
 
-function selectQuickSlot(slotValue) {
-  const slotSelect = document.getElementById("slot_time");
-  if (slotSelect) {
-    slotSelect.value = slotValue;
-    clearFieldError("slot_time");
+const journeyController = {
+  currentStage: 1,
 
-    // Update visual selected state on pills
-    document.querySelectorAll(".slot-pill").forEach(function (pill) {
-      if (pill.dataset.slot === slotValue) {
-        pill.classList.add("slot-pill--selected");
-      } else {
-        pill.classList.remove("slot-pill--selected");
+  goToStage: function (stageNumber) {
+    this.currentStage = stageNumber;
+
+    // 1. Update Stepper Nav
+    for (let i = 1; i <= 4; i++) {
+      const stepEl = document.getElementById("step-nav-" + i);
+      if (!stepEl) continue;
+
+      stepEl.classList.remove("stepper-step--active", "stepper-step--completed");
+
+      if (i < stageNumber) {
+        stepEl.classList.add("stepper-step--completed");
+      } else if (i === stageNumber) {
+        stepEl.classList.add("stepper-step--active");
       }
-    });
-
-    // Smooth scroll to booking card
-    const bookingCard = document.getElementById("booking-form");
-    if (bookingCard) {
-      bookingCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-  }
-}
-window.selectQuickSlot = selectQuickSlot;
 
-function attachSlotPillSync() {
-  const slotSelect = document.getElementById("slot_time");
-  if (!slotSelect) return;
+    // 2. Update Stepper Lines
+    const line12 = document.getElementById("line-1-2");
+    const line23 = document.getElementById("line-2-3");
+    const line34 = document.getElementById("line-3-4");
 
-  slotSelect.addEventListener("change", function () {
-    const val = this.value;
-    document.querySelectorAll(".slot-pill").forEach(function (pill) {
-      if (pill.dataset.slot === val) {
-        pill.classList.add("slot-pill--selected");
+    if (line12) line12.classList.toggle("stepper-line--completed", stageNumber > 1);
+    if (line23) line23.classList.toggle("stepper-line--completed", stageNumber > 2);
+    if (line34) line34.classList.toggle("stepper-line--completed", stageNumber > 3);
+
+    // 3. Show only current stage card
+    for (let i = 1; i <= 4; i++) {
+      const stageEl = document.getElementById("stage-" + i);
+      if (!stageEl) continue;
+      if (i === stageNumber) {
+        stageEl.style.display = "block";
+        stageEl.classList.add("journey-stage--active");
       } else {
-        pill.classList.remove("slot-pill--selected");
+        stageEl.style.display = "none";
+        stageEl.classList.remove("journey-stage--active");
       }
+    }
+
+    // 4. Smooth scroll to top of student journey container
+    const container = document.getElementById("studentJourneyApp");
+    if (container) {
+      container.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // 5. Save state in sessionStorage
+    try {
+      sessionStorage.setItem("kmie_stage", stageNumber);
+    } catch (e) {}
+  },
+
+  selectSlot: function (slotValue) {
+    const slotSelect = document.getElementById("slot_time");
+    if (slotSelect) {
+      slotSelect.value = slotValue;
+      clearFieldError("slot_time");
+    }
+
+    document.querySelectorAll(".slot-card").forEach(function (card) {
+      const isSelected = card.getAttribute("data-slot") === slotValue;
+      card.classList.toggle("slot-card--selected", isSelected);
+      card.setAttribute("aria-checked", isSelected ? "true" : "false");
     });
-  });
-}
+  },
+
+  copyMeetingLink: function () {
+    const urlText = document.getElementById("meetingUrlText")?.textContent?.trim() || "";
+    const btn = document.getElementById("copyMeetingBtn");
+    if (!urlText) return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(urlText).then(function () {
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = "✅ Copied!";
+          btn.classList.add("btn--primary");
+          setTimeout(function () {
+            btn.innerHTML = orig;
+            btn.classList.remove("btn--primary");
+          }, 2000);
+        }
+      });
+    } else {
+      alert("Demo Session URL: " + urlText);
+    }
+  },
+};
+window.journeyController = journeyController;
+
+// Backward-compat for any legacy slot selectors
+window.selectQuickSlot = function (val) {
+  journeyController.selectSlot(val);
+};
 
 /* ============================================================
    9. INIT
@@ -448,8 +631,21 @@ document.addEventListener("DOMContentLoaded", function () {
   attachPasswordToggle();
   attachTopNavToggle();
   attachMobileSidebarToggle();
-  attachSlotPillSync();
   autoDismissFlash();
   scrollToFlash();
+
+  // Initialize Journey Stage
+  if (document.getElementById("studentJourneyApp")) {
+    const confStudentName = document.getElementById("conf-student-name")?.textContent?.trim();
+    const stage2StudentName = document.getElementById("stage2-student-name")?.textContent?.trim();
+
+    if (confStudentName && confStudentName !== "") {
+      journeyController.goToStage(4);
+    } else if (stage2StudentName && stage2StudentName !== "") {
+      journeyController.goToStage(2);
+    } else {
+      journeyController.goToStage(1);
+    }
+  }
 });
 

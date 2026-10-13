@@ -117,6 +117,11 @@ def health_ready():
 @app.route("/")
 def index():
     """Public portal: student enquiry form, booking form, and records."""
+    if request.args.get("reset"):
+        session.pop("active_lead", None)
+        session.pop("active_booking", None)
+        session.pop("journey_stage", None)
+
     db_status = "connected"
     error_message = None
     enquiries = []
@@ -131,6 +136,9 @@ def index():
         logger.error("Error reading database: %s", exc)
 
     stats = _compute_stats(enquiries, bookings)
+    active_lead = session.get("active_lead")
+    active_booking = session.get("active_booking")
+    journey_stage = session.get("journey_stage", 1)
 
     return render_template(
         "index.html",
@@ -140,6 +148,9 @@ def index():
         db_status=db_status,
         error_message=error_message,
         demo_meeting_url=get_zoom_placeholder_url(),
+        active_lead=active_lead,
+        active_booking=active_booking,
+        journey_stage=journey_stage,
     )
 
 
@@ -164,8 +175,19 @@ def submit_enquiry_route():
 
     result = submit_enquiry(form_data)
 
+    is_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+    )
+    if is_ajax:
+        status_code = 200 if result.get("success") else (409 if result.get("duplicate") else 400)
+        return jsonify(result), status_code
+
     if result.get("success"):
         lead = result["lead"]
+        session["active_lead"] = lead
+        session["journey_stage"] = 2
         sync_note = " (Synced to Google Sheets)" if result.get("sheet_synced") else " (Google Sheets sync pending)"
         flash(
             f"✅ Enquiry submitted successfully! "
@@ -200,7 +222,19 @@ def create_booking_route():
 
     result = create_or_reschedule_booking(form_data)
 
+    is_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+    )
+    if is_ajax:
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
+
     if result.get("success"):
+        if result.get("booking"):
+            session["active_booking"] = result["booking"]
+        session["journey_stage"] = 4
         flash(result["confirmation"], "booking_success")
     elif result.get("errors"):
         for field, msg in result["errors"].items():

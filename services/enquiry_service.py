@@ -57,7 +57,7 @@ def submit_enquiry(first_arg, second_arg=None) -> dict:
 
         # 3. Application-level duplicate check on phone_e164
         cursor.execute(
-            "SELECT id, student_name, created_at FROM leads WHERE phone_e164 = ?",
+            "SELECT * FROM leads WHERE phone_e164 = ?",
             (phone_e164,),
         )
         existing = cursor.fetchone()
@@ -65,6 +65,7 @@ def submit_enquiry(first_arg, second_arg=None) -> dict:
             return {
                 "success": False,
                 "duplicate": True,
+                "lead": dict(existing),
                 "message": (
                     f"This phone number is already registered under the name "
                     f"'{existing['student_name']}' (Lead ID: {existing['id']}). "

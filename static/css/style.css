@@ -287,13 +287,584 @@ img, svg {
   max-width: 100%;
 }
 
-.student-portal-container {
+.student-portal-container,
+.student-journey-container {
   width: 100%;
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(18px, 3vw, 26px);
+  gap: clamp(18px, 3vw, 24px);
+}
+
+/* ============================================================
+   PROGRESS STEPPER (01 Enquiry -> 02 Book -> 03 Slot -> 04 Conf)
+   ============================================================ */
+.journey-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  cursor: default;
+  transition: var(--transition);
+}
+
+.step-indicator {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.step-check {
+  display: none;
+}
+
+.step-label-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-light);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.step-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+/* Active Step */
+.stepper-step--active .step-indicator {
+  background: var(--primary-teal);
+  border-color: var(--dark-teal);
+  color: var(--surface-white);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}
+
+.stepper-step--active .step-title {
+  color: var(--text-headings);
+  font-weight: 700;
+}
+
+.stepper-step--active .step-tag {
+  color: var(--primary-teal);
+}
+
+/* Completed Step */
+.stepper-step--completed .step-indicator {
+  background: var(--pale-mint);
+  border-color: var(--soft-mint);
+  color: var(--dark-teal);
+}
+
+.stepper-step--completed .step-num {
+  display: none;
+}
+
+.stepper-step--completed .step-check {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.stepper-step--completed .step-title {
+  color: var(--dark-teal);
+}
+
+/* Connector Line */
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 10px;
+  transition: var(--transition);
+  min-width: 14px;
+}
+
+.stepper-line--completed {
+  background: var(--primary-teal);
+}
+
+@media (max-width: 640px) {
+  .journey-stepper {
+    padding: 10px 12px;
+  }
+  .step-label-wrap {
+    display: none;
+  }
+  .stepper-line {
+    margin: 0 6px;
+  }
+  .step-indicator {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}
+
+/* 2. STAGE PROGRESSION & ANIMATION */
+.journey-stage {
+  display: none;
+  width: 100%;
+  animation: fadeInStage 0.25s ease-in-out;
+}
+
+.journey-stage--active {
+  display: block;
+}
+
+@keyframes fadeInStage {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stage Hero */
+.journey-hero {
+  text-align: center;
+  padding: 6px 10px 12px 10px;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.journey-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background: var(--pale-mint);
+  color: var(--dark-teal);
+  border: 1px solid var(--soft-mint);
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.journey-hero-title {
+  font-size: clamp(21px, 4.2vw, 27px);
+  font-weight: 800;
+  color: var(--text-headings);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.journey-hero-subtitle {
+  font-size: clamp(13px, 2.2vw, 14.5px);
+  color: var(--text-body);
+  line-height: 1.55;
+}
+
+.stage-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary-teal);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+/* Duplicate Phone Alert */
+.duplicate-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  color: #92400E;
+  font-size: 13px;
+}
+
+.duplicate-alert-icon {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.duplicate-alert-body strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Privacy Note */
+.privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* STAGE 2: REGISTERED WELCOME CARD */
+.registered-welcome-card {
+  text-align: center;
+}
+
+.registered-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--pale-mint);
+  border: 1px solid var(--soft-mint);
+  color: var(--dark-teal);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+}
+
+.success-check-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary-teal);
+  color: var(--surface-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.student-summary-card {
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-lead-badge {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dark-teal);
+}
+
+.summary-status-badge {
+  font-size: 11.5px;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 520px) {
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.summary-value {
+  font-size: 14px;
+  color: var(--text-headings);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.stage2-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn--lg {
+  min-height: 46px;
+  height: 46px;
+  padding: 0 28px;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+/* STAGE 3: SELECTABLE TIME SLOT CARDS */
+.slot-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+@media (max-width: 440px) {
+  .slot-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.slot-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-white);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.slot-card:hover {
+  border-color: var(--primary-teal);
+  background: #F4FBF9;
+  transform: translateY(-1px);
+}
+
+.slot-card-icon {
+  font-size: 20px;
+}
+
+.slot-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-card-time {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-headings);
+  line-height: 1.2;
+}
+
+.slot-card-zone {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.slot-card-check {
+  font-size: 14px;
+  font-weight: 800;
+  color: transparent;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.slot-card--selected {
+  background: var(--pale-mint) !important;
+  border-color: var(--primary-teal) !important;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
+}
+
+.slot-card--selected .slot-card-time {
+  color: var(--dark-teal);
+}
+
+.slot-card--selected .slot-card-check {
+  background: var(--primary-teal);
+  border-color: var(--primary-teal);
+  color: var(--surface-white);
+}
+
+/* STAGE 4: BOOKING CONFIRMATION */
+.confirmation-card {
+  text-align: center;
+}
+
+.confirmation-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--pale-mint);
+  border: 1px solid var(--soft-mint);
+  color: var(--dark-teal);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+}
+
+.conf-details-card {
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.conf-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+@media (min-width: 520px) {
+  .conf-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.conf-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.conf-item--full {
+  grid-column: 1 / -1;
+}
+
+.conf-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.conf-val {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-headings);
+}
+
+.time-highlight {
+  color: var(--primary-teal);
+  font-size: 15px;
+}
+
+.conf-meeting-box {
+  background: var(--surface-white);
+  border: 1px solid var(--soft-mint);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 10px;
+}
+
+.meeting-box-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.meeting-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.meeting-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--dark-teal);
+}
+
+.meeting-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 2px 0 0 0;
+}
+
+.meeting-link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.meeting-url {
+  font-family: monospace;
+  font-size: 12.5px;
+  color: var(--dark-teal);
+  font-weight: 600;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.conf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 /* ============================================================
