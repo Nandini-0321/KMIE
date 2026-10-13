@@ -31,6 +31,7 @@ from services.booking_service import (
     update_booking_status,
     get_all_bookings,
     get_zoom_placeholder_url,
+    find_booking_or_enquiry,
 )
 from services.google_sheets_service import (
     is_configured as is_sheets_configured,
@@ -265,6 +266,55 @@ def update_status_route():
         flash(result.get("message", "Failed to update status."), "error")
 
     return redirect(url_for("index") + "#bookings-table")
+
+
+@app.route("/booking/find", methods=["GET", "POST"])
+def find_booking_route():
+    """Retrieve demo booking or registered enquiry details by ID, Phone, or Email."""
+    if request.method == "POST":
+        if request.is_json:
+            data = request.get_json(silent=True) or {}
+            search_type = data.get("search_type", "")
+            search_value = data.get("search_value", "")
+        else:
+            search_type = request.form.get("search_type", "")
+            search_value = request.form.get("search_value", "")
+    else:
+        search_type = request.args.get("search_type", "")
+        search_value = request.args.get("search_value", "")
+
+    result = find_booking_or_enquiry(search_type, search_value)
+
+    is_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+    )
+    if is_ajax:
+        status_code = 200 if result.get("success") else (404 if result.get("not_found") else 400)
+        return jsonify(result), status_code
+
+    if result.get("success"):
+        session["found_booking"] = result["data"]
+        flash(f"Booking details retrieved for {result['data']['student_name']}.", "success")
+    elif result.get("not_found"):
+        flash(result["message"], "warning")
+    else:
+        flash(result.get("error", "Failed to retrieve booking."), "error")
+
+    return redirect(url_for("index") + "#find-booking")
+
+
+@app.route("/booking/activate-lead/<int:lead_id>", methods=["POST"])
+def activate_lead_for_booking_route(lead_id: int):
+    """Set registered student lead as active and route directly to Stage 3 (slot selection)."""
+    lead = get_enquiry_by_id(lead_id)
+    if not lead:
+        return jsonify({"success": False, "message": "Lead not found."}), 404
+
+    session["active_lead"] = lead
+    session["journey_stage"] = 3
+    return jsonify({"success": True, "lead": lead, "stage": 3}), 200
 
 
 @app.route("/api/enquiries")

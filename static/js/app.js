@@ -621,6 +621,371 @@ window.selectQuickSlot = function (val) {
 };
 
 /* ============================================================
+   9. FIND MY DEMO BOOKING FEATURE
+   ============================================================ */
+
+window.switchSearchMethod = function (method) {
+  const hiddenType = document.getElementById("find_search_type");
+  const inputEl = document.getElementById("find_search_value");
+  const labelEl = document.getElementById("findInputLabel");
+  const hintEl = document.getElementById("findInputHint");
+  const errorEl = document.getElementById("findError");
+
+  if (hiddenType) hiddenType.value = method;
+  if (errorEl) {
+    errorEl.textContent = "";
+    errorEl.style.display = "none";
+  }
+
+  // Update tabs active state
+  document.querySelectorAll(".search-tab").forEach(function (tab) {
+    const isActive = tab.getAttribute("data-method") === method;
+    tab.classList.toggle("search-tab--active", isActive);
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  if (!inputEl) return;
+  inputEl.classList.remove("is-invalid");
+
+  if (method === "phone") {
+    inputEl.type = "tel";
+    inputEl.placeholder = "Enter your registered mobile number (e.g. 9876543210)";
+    if (labelEl) labelEl.innerHTML = 'Registered Mobile Number <span class="required">*</span>';
+    if (hintEl) hintEl.textContent = "Enter your 10-digit Indian mobile number (+91 or leading 0 supported).";
+  } else if (method === "email") {
+    inputEl.type = "email";
+    inputEl.placeholder = "Enter your registered email address (e.g. student@example.com)";
+    if (labelEl) labelEl.innerHTML = 'Registered Email Address <span class="required">*</span>';
+    if (hintEl) hintEl.textContent = "The email address you provided during student enquiry registration.";
+  } else {
+    // default: id
+    inputEl.type = "text";
+    inputEl.placeholder = "Enter your reference ID (e.g. 1 or #1)";
+    if (labelEl) labelEl.innerHTML = 'Booking / Enquiry Reference ID <span class="required">*</span>';
+    if (hintEl) hintEl.textContent = "Accepts your Demo Booking Reference ID or Student Enquiry Lead ID.";
+  }
+  inputEl.focus();
+};
+
+window.clearFindBooking = function () {
+  const inputEl = document.getElementById("find_search_value");
+  const errorEl = document.getElementById("findError");
+  const resultArea = document.getElementById("findResultArea");
+
+  if (inputEl) {
+    inputEl.value = "";
+    inputEl.classList.remove("is-invalid");
+  }
+  if (errorEl) {
+    errorEl.textContent = "";
+    errorEl.style.display = "none";
+  }
+  if (resultArea) {
+    resultArea.innerHTML = "";
+    resultArea.style.display = "none";
+  }
+};
+
+window.findBookingHandler = function (event) {
+  if (event) event.preventDefault();
+
+  const type = document.getElementById("find_search_type")?.value || "id";
+  const inputEl = document.getElementById("find_search_value");
+  const val = (inputEl?.value || "").trim();
+  const errorEl = document.getElementById("findError");
+  const resultArea = document.getElementById("findResultArea");
+  const submitBtn = document.getElementById("findBookingSubmitBtn");
+
+  if (errorEl) {
+    errorEl.textContent = "";
+    errorEl.style.display = "none";
+  }
+  if (inputEl) inputEl.classList.remove("is-invalid");
+
+  if (!val) {
+    if (errorEl) {
+      errorEl.textContent = "Please enter your details to search.";
+      errorEl.style.display = "block";
+    }
+    if (inputEl) inputEl.classList.add("is-invalid");
+    return false;
+  }
+
+  // Client-side quick checks
+  if (type === "phone") {
+    const cleaned = val.replace(/[\s\-\.\(\)]/g, "");
+    if (cleaned.length < 10) {
+      if (errorEl) {
+        errorEl.textContent = "Please enter a valid 10-digit mobile number.";
+        errorEl.style.display = "block";
+      }
+      if (inputEl) inputEl.classList.add("is-invalid");
+      return false;
+    }
+  } else if (type === "email") {
+    if (!val.includes("@") || !val.includes(".")) {
+      if (errorEl) {
+        errorEl.textContent = "Please enter a valid email address.";
+        errorEl.style.display = "block";
+      }
+      if (inputEl) inputEl.classList.add("is-invalid");
+      return false;
+    }
+  }
+
+  // Button loading state
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Searching...';
+  }
+
+  const url = "/booking/find?search_type=" + encodeURIComponent(type) + "&search_value=" + encodeURIComponent(val);
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "Accept": "application/json",
+    },
+  })
+    .then(function (resp) {
+      return resp.json().then(function (data) {
+        return { status: resp.status, data: data };
+      });
+    })
+    .then(function (res) {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Booking';
+      }
+
+      if (!resultArea) return;
+      resultArea.style.display = "block";
+
+      if (res.data.not_found) {
+        resultArea.innerHTML = `
+          <div class="find-alert find-alert--warning" role="alert">
+            <span class="find-alert-icon">⚠️</span>
+            <div class="find-alert-body">
+              <strong>No Matching Record Found</strong>
+              <p>${escapeHtml(res.data.message || "We couldn't find a matching record. Please check your details and try again.")}</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (!res.data.success) {
+        const errMsg = res.data.error || "An error occurred while retrieving your details.";
+        if (errorEl) {
+          errorEl.textContent = errMsg;
+          errorEl.style.display = "block";
+        }
+        if (inputEl) inputEl.classList.add("is-invalid");
+        resultArea.style.display = "none";
+        return;
+      }
+
+      // Render retrieved card
+      const d = res.data.data;
+      const hasBooking = res.data.has_booking;
+
+      let bookingDetailsHtml = "";
+      if (hasBooking) {
+        bookingDetailsHtml = `
+          <div class="find-details-grid">
+            <div class="find-item">
+              <span class="find-label">Student Name</span>
+              <strong class="find-value">${escapeHtml(d.student_name)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Phone</span>
+              <strong class="find-value">${escapeHtml(d.phone_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Email</span>
+              <strong class="find-value">${escapeHtml(d.email_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Enquiry Ref ID</span>
+              <strong class="find-value">Lead #${d.lead_id}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Booking Ref ID</span>
+              <strong class="find-value">Booking #${d.booking_id}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Demo Date</span>
+              <strong class="find-value">${escapeHtml(d.demo_date_formatted || d.demo_date)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Demo Time Slot</span>
+              <strong class="find-value text-teal">${escapeHtml(d.slot_time_display || d.slot_time)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Target / Course</span>
+              <strong class="find-value">${escapeHtml(d.exam_goal || 'NEET/JEE')} • ${escapeHtml(d.interested_course || '')}</strong>
+            </div>
+            <div class="find-item find-item--full">
+              <span class="find-label">Booking Status:</span>
+              <span class="badge ${d.booking_status === 'Booked' ? 'badge--synced' : 'badge--attended'}">${escapeHtml(d.booking_status)}</span>
+              <span class="sync-tag sync-tag--${d.sheet_sync_status}">Sheet Sync: ${escapeHtml(d.sheet_sync_status)}</span>
+            </div>
+          </div>
+
+          <!-- Meeting Link Box -->
+          <div class="find-meeting-box">
+            <div class="find-meeting-header">
+              <span class="find-meeting-icon">🎥</span>
+              <div>
+                <strong>Official Demo Session Classroom Link:</strong>
+                <p class="find-meeting-sub">Assessment Demonstration Link • Please join 5 minutes before your scheduled slot.</p>
+              </div>
+            </div>
+            <div class="find-meeting-link-row">
+              <code class="find-meeting-code" id="retrievedMeetingUrl">${escapeHtml(d.zoom_link)}</code>
+              <button type="button" class="btn btn--xs btn--outline" onclick="copyRetrievedMeetingLink()">📋 Copy Link</button>
+            </div>
+          </div>
+
+          <div class="find-result-actions">
+            <a href="${escapeHtml(d.zoom_link)}" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
+              <span class="btn-icon">🚀</span> Open Meeting Link
+            </a>
+            <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+              🔍 Search Again
+            </button>
+          </div>
+        `;
+      } else {
+        // Registered Enquiry, not yet booked demo!
+        bookingDetailsHtml = `
+          <div class="find-details-grid">
+            <div class="find-item">
+              <span class="find-label">Student Name</span>
+              <strong class="find-value">${escapeHtml(d.student_name)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Phone</span>
+              <strong class="find-value">${escapeHtml(d.phone_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Masked Email</span>
+              <strong class="find-value">${escapeHtml(d.email_masked)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Enquiry Ref ID</span>
+              <strong class="find-value">Lead #${d.lead_id}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Academic Goal</span>
+              <strong class="find-value">Class ${d.class_level} • ${escapeHtml(d.exam_goal)}</strong>
+            </div>
+            <div class="find-item">
+              <span class="find-label">Interested Course</span>
+              <strong class="find-value">${escapeHtml(d.interested_course || '—')}</strong>
+            </div>
+            <div class="find-item find-item--full">
+              <span class="find-label">Booking Status:</span>
+              <span class="badge badge--warning">Registered — Demo Not Yet Booked</span>
+            </div>
+          </div>
+
+          <div class="find-alert find-alert--info" style="margin-top: 14px;">
+            <span class="find-alert-icon">💡</span>
+            <div class="find-alert-body">
+              <strong>Your enquiry is registered!</strong>
+              <p>You can choose your preferred demo date and time slot right now.</p>
+            </div>
+          </div>
+
+          <div class="find-result-actions" style="margin-top: 18px;">
+            <button type="button" class="btn btn--primary btn--lg" onclick="activateAndBookLead(${d.lead_id}, '${escapeHtml(d.student_name)}')">
+              <span class="btn-icon">📅</span> Book My Demo
+            </button>
+            <button type="button" class="btn btn--ghost" onclick="clearFindBooking()">
+              🔍 Search Again
+            </button>
+          </div>
+        `;
+      }
+
+      resultArea.innerHTML = `
+        <div class="find-result-card">
+          <div class="find-result-header">
+            <span class="find-badge-success">✓ Record Found</span>
+            <span class="find-header-lead">Lead #${d.lead_id}</span>
+          </div>
+          ${bookingDetailsHtml}
+        </div>
+      `;
+
+      resultArea.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    })
+    .catch(function (err) {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Find My Booking';
+      }
+      if (resultArea) {
+        resultArea.style.display = "block";
+        resultArea.innerHTML = `
+          <div class="find-alert find-alert--error" role="alert">
+            <span class="find-alert-icon">❌</span>
+            <div class="find-alert-body">
+              <strong>Error Loading Details</strong>
+              <p>A network or server error occurred. Please try again.</p>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+  return false;
+};
+
+window.copyRetrievedMeetingLink = function () {
+  const url = document.getElementById("retrievedMeetingUrl")?.textContent?.trim();
+  if (!url) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function () {
+      alert("✅ Meeting link copied to clipboard!");
+    });
+  } else {
+    alert("Demo Session URL: " + url);
+  }
+};
+
+window.activateAndBookLead = function (leadId, studentName) {
+  const leadInput = document.getElementById("lead_id");
+  if (leadInput) leadInput.value = leadId;
+
+  const stage3Student = document.getElementById("stage3-student-name");
+  if (stage3Student && studentName) stage3Student.textContent = studentName;
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
+  fetch("/booking/activate-lead/" + leadId, {
+    method: "POST",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": csrfToken,
+    },
+  }).finally(function () {
+    journeyController.goToStage(3);
+  });
+};
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* ============================================================
    9. INIT
    ============================================================ */
 document.addEventListener("DOMContentLoaded", function () {

@@ -223,6 +223,146 @@
       </form>
     </div>
 
+    <!-- ================================================================
+         BOOKED DEMO SESSION & FIND MY BOOKING SECTION
+    ================================================================ -->
+    <div class="demo-access-wrapper" id="booked-demo-section" style="margin-top: 24px;">
+      
+      <!-- A. Direct Demo Meeting Link Card -->
+      <section class="portal-card demo-access-card" aria-labelledby="demo-access-heading">
+        <div class="card-badge-row">
+          <span class="status-badge status-badge--mint">
+            <span class="status-dot"></span> Live Classroom Access
+          </span>
+        </div>
+        <div class="section-header">
+          <h2 class="section-title" id="demo-access-heading" style="font-size: 20px;">Booked for a Demo Session?</h2>
+          <p class="section-subtitle">
+            If you have already booked a demo session, visit the link below to join your live interactive class.
+          </p>
+        </div>
+
+        <div class="demo-access-content">
+          <div class="demo-access-box">
+            <div class="demo-access-icon">
+              <span>🎥</span>
+            </div>
+            <div class="demo-access-details">
+              <span class="demo-access-label">Official Demo Session Link:</span>
+              <a
+                href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="demo-access-url"
+                id="directDemoLink"
+              >
+                {{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}
+              </a>
+              <p class="demo-access-hint">
+                Please join 5 minutes before your scheduled slot with audio and video enabled.
+              </p>
+            </div>
+          </div>
+
+          <div class="demo-access-action">
+            <a
+              href="{{ demo_meeting_url or 'https://zoom.us/j/DEMO-PLACEHOLDER' }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--primary btn--demo-join"
+              id="joinDemoBtn"
+            >
+              <span class="btn-icon">🔗</span>
+              Visit Demo Session Link
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- B. Find Your Demo Booking Card (Self-Service Lookup) -->
+      <section class="portal-card find-booking-card" id="findBookingCard" style="margin-top: 18px;" aria-labelledby="find-booking-heading">
+        <div class="section-header">
+          <div class="stage-tag" style="background: rgba(13, 148, 136, 0.12); color: #0f766e;">Appointment Self-Service</div>
+          <h3 class="section-title" id="find-booking-heading" style="font-size: 20px;">Find Your Demo Booking</h3>
+          <p class="section-subtitle">
+            Already registered or booked a demo? Retrieve your appointment details using your booking ID, phone number, or email address.
+          </p>
+        </div>
+
+        <!-- Search Form -->
+        <form id="findBookingForm" class="find-booking-form" onsubmit="return findBookingHandler(event)" novalidate>
+          <div class="search-methods-wrap">
+            <span class="search-methods-label">Search using:</span>
+            <div class="search-tabs" role="tablist" aria-label="Search Criteria Options">
+              <button
+                type="button"
+                class="search-tab search-tab--active"
+                data-method="id"
+                role="tab"
+                aria-selected="true"
+                onclick="switchSearchMethod('id')"
+              >
+                Booking / Enquiry ID
+              </button>
+              <button
+                type="button"
+                class="search-tab"
+                data-method="phone"
+                role="tab"
+                aria-selected="false"
+                onclick="switchSearchMethod('phone')"
+              >
+                Phone Number
+              </button>
+              <button
+                type="button"
+                class="search-tab"
+                data-method="email"
+                role="tab"
+                aria-selected="false"
+                onclick="switchSearchMethod('email')"
+              >
+                Email Address
+              </button>
+            </div>
+          </div>
+
+          <input type="hidden" id="find_search_type" name="search_type" value="id" />
+
+          <div class="form-group" style="margin-top: 16px;">
+            <label class="form-label" id="findInputLabel" for="find_search_value">
+              Booking / Enquiry Reference ID <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="find_search_value"
+              name="search_value"
+              class="form-control"
+              placeholder="Enter your reference ID (e.g. 1 or #1)"
+              required
+              autocomplete="off"
+            />
+            <span class="form-hint" id="findInputHint">Accepts your Demo Booking Reference ID or Student Enquiry Lead ID.</span>
+            <span class="form-error" id="findError" style="display: none;"></span>
+          </div>
+
+          <div class="find-form-actions">
+            <button type="submit" class="btn btn--primary" id="findBookingSubmitBtn">
+              <span class="btn-icon">🔍</span>
+              Find My Booking
+            </button>
+            <button type="button" class="btn btn--ghost" id="findBookingClearBtn" onclick="clearFindBooking()">
+              Clear
+            </button>
+          </div>
+        </form>
+
+        <!-- Dynamic Results Container -->
+        <div id="findResultArea" class="find-result-area" style="display: none; margin-top: 20px;"></div>
+      </section>
+
+    </div>
+
     <!-- Informational Learning Benefits Card -->
     <div class="portal-card benefits-card" style="margin-top: 20px;">
       <div class="section-header">
