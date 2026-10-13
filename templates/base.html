@@ -14,7 +14,7 @@
 <body>
 
   <!-- ================================================================
-       TOP NAVIGATION (Simplified to Two Main Destinations)
+       TOP NAVIGATION (Compact Header with 2 Primary Destinations)
   ================================================================ -->
   <header class="site-header">
     <div class="header-inner">
@@ -42,7 +42,7 @@
         <span class="hamburger-icon">☰</span>
       </button>
 
-      <!-- Navigation destinations (Only Two Primary Destinations) -->
+      <!-- Primary Navigation: Student Enquiry & Admin Dashboard -->
       <nav class="header-nav" id="topNavMenu" aria-label="Primary Navigation">
         <a
           href="{{ url_for('index') }}"
@@ -98,13 +98,22 @@
   </main>
 
   <!-- ================================================================
-       SITE FOOTER
+       SITE FOOTER (Compact, Educational Message, Clean Links)
   ================================================================ -->
   <footer class="site-footer">
     <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">🎓</span>
+        <span class="footer-institute-name">Komali Mam Institute of Excellence (KMIE)</span>
+      </div>
       <p class="footer-tagline">KMIE — Helping Students Take the Next Step Towards Their Goals.</p>
+      <div class="footer-nav">
+        <a href="{{ url_for('index') }}" class="footer-link">Student Enquiry</a>
+        <span class="footer-sep">•</span>
+        <a href="{{ url_for('admin_login') }}" class="footer-link">Admin Dashboard</a>
+      </div>
       <p class="footer-note">
-        Komali Mam Institute of Excellence &nbsp;|&nbsp; Student Enquiry &amp; Demo Booking Automation System
+        Student Enquiry &amp; Demo Booking Automation System
       </p>
     </div>
   </footer>

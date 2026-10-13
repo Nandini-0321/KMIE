@@ -11,24 +11,79 @@
   </div>
 
   <!-- ================================================================
-       A. WELCOME SECTION (Compact, Professional & Focused)
+       1. HERO SECTION (Centred, Welcoming, Compact Spacing)
   ================================================================ -->
-  <header class="welcome-section">
-    <div class="welcome-badge">Komali Mam Institute of Excellence</div>
-    <h1 class="welcome-title">Your Learning Journey Starts Here</h1>
-    <p class="welcome-subtitle">
-      Tell us about your academic goals, explore the right learning path, and book a demo session to take your next step with confidence.
+  <header class="hero-section">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      ADMISSIONS 2026–2027
+    </div>
+    <h1 class="hero-title">Start Your Journey Towards NEET &amp; JEE Excellence</h1>
+    <p class="hero-subtitle">
+      Submit your enquiry below to connect with our academic counsellor and explore the right learning path for your goals.
     </p>
   </header>
 
   <!-- ================================================================
-       B. STUDENT ENQUIRY FORM
+       2. DEMO BOOKING INFORMATION CARD (Find Your Demo Class)
   ================================================================ -->
-  <section class="portal-card" id="enquiry-form" aria-labelledby="enquiry-heading">
+  <section class="portal-card demo-booking-card" id="booking-form" aria-labelledby="booking-heading">
+    <div class="card-badge-row">
+      <span class="status-badge status-badge--mint">
+        <span class="status-dot"></span> Demo Booking Available
+      </span>
+    </div>
     <div class="section-header">
-      <h2 class="section-title" id="enquiry-heading">Student Enquiry</h2>
+      <h2 class="section-title" id="booking-heading">Find Your Demo Class</h2>
       <p class="section-subtitle">
-        Share your details and interests so our team can guide you towards the right course.
+        Select a suitable date and available slot to experience our proven teaching methodology.
+      </p>
+    </div>
+
+    {% include "partials/booking_form.html" %}
+  </section>
+
+  <!-- ================================================================
+       3. 4 DAILY DEMO TIME SLOTS INFORMATION CARD
+  ================================================================ -->
+  <section class="portal-card time-slots-card" aria-labelledby="slots-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="slots-heading">4 Daily Demo Time Slots</h2>
+      <p class="section-subtitle">
+        Choose a convenient session time and take the first step towards your learning goals.
+      </p>
+    </div>
+    <div class="slots-pill-grid">
+      <button type="button" class="slot-pill" data-slot="13:00" onclick="selectQuickSlot('13:00')" aria-label="Select 1:00 PM Demo Slot">
+        <span class="slot-pill-time">1:00 PM</span>
+        <span class="slot-pill-zone">IST</span>
+      </button>
+      <button type="button" class="slot-pill" data-slot="15:00" onclick="selectQuickSlot('15:00')" aria-label="Select 3:00 PM Demo Slot">
+        <span class="slot-pill-time">3:00 PM</span>
+        <span class="slot-pill-zone">IST</span>
+      </button>
+      <button type="button" class="slot-pill" data-slot="17:00" onclick="selectQuickSlot('17:00')" aria-label="Select 5:00 PM Demo Slot">
+        <span class="slot-pill-time">5:00 PM</span>
+        <span class="slot-pill-zone">IST</span>
+      </button>
+      <button type="button" class="slot-pill" data-slot="19:00" onclick="selectQuickSlot('19:00')" aria-label="Select 7:00 PM Demo Slot">
+        <span class="slot-pill-time">7:00 PM</span>
+        <span class="slot-pill-zone">IST</span>
+      </button>
+    </div>
+    <p class="slots-footnote">
+      💡 <em>Tap any slot to quickly select it in the Demo Booking form.</em>
+    </p>
+  </section>
+
+  <!-- ================================================================
+       4. STUDENT ENQUIRY FORM CARD
+  ================================================================ -->
+  <section class="portal-card enquiry-card" id="enquiry-form" aria-labelledby="enquiry-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="enquiry-heading">Student Enquiry Form</h2>
+      <p class="section-subtitle">
+        Fill in your details so our team can guide you towards the right course.
       </p>
     </div>
 
@@ -36,17 +91,47 @@
   </section>
 
   <!-- ================================================================
-       C. DEMO BOOKING FORM
+       5. WHY LEARN WITH KMIE? (Learning Benefits Section)
   ================================================================ -->
-  <section class="portal-card" id="booking-form" aria-labelledby="booking-heading">
+  <section class="portal-card benefits-card" aria-labelledby="benefits-heading">
     <div class="section-header">
-      <h2 class="section-title" id="booking-heading">Book Your Demo</h2>
+      <h2 class="section-title" id="benefits-heading">Why Learn with KMIE?</h2>
       <p class="section-subtitle">
-        Choose a convenient date and available time slot for your demo session.
+        Dedicated guidance and structured preparation to help every aspirant excel.
       </p>
     </div>
 
-    {% include "partials/booking_form.html" %}
+    <div class="benefits-grid">
+      <div class="benefit-item">
+        <div class="benefit-icon-badge">
+          <span>✓</span>
+        </div>
+        <div class="benefit-text">
+          <h3 class="benefit-title">Personalized Mentorship</h3>
+          <p class="benefit-desc">Guidance aligned with each student's academic goals.</p>
+        </div>
+      </div>
+
+      <div class="benefit-item">
+        <div class="benefit-icon-badge">
+          <span>✓</span>
+        </div>
+        <div class="benefit-text">
+          <h3 class="benefit-title">Comprehensive Curriculum</h3>
+          <p class="benefit-desc">Structured preparation for NEET and JEE.</p>
+        </div>
+      </div>
+
+      <div class="benefit-item">
+        <div class="benefit-icon-badge">
+          <span>✓</span>
+        </div>
+        <div class="benefit-text">
+          <h3 class="benefit-title">Free Demo Booking</h3>
+          <p class="benefit-desc">Explore a demo session before choosing your learning path.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
 </div>

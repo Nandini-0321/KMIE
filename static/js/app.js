@@ -394,6 +394,50 @@ function attachMobileSidebarToggle() {
 }
 
 /* ============================================================
+   8b. QUICK TIME SLOT SELECTOR
+   ============================================================ */
+
+function selectQuickSlot(slotValue) {
+  const slotSelect = document.getElementById("slot_time");
+  if (slotSelect) {
+    slotSelect.value = slotValue;
+    clearFieldError("slot_time");
+
+    // Update visual selected state on pills
+    document.querySelectorAll(".slot-pill").forEach(function (pill) {
+      if (pill.dataset.slot === slotValue) {
+        pill.classList.add("slot-pill--selected");
+      } else {
+        pill.classList.remove("slot-pill--selected");
+      }
+    });
+
+    // Smooth scroll to booking card
+    const bookingCard = document.getElementById("booking-form");
+    if (bookingCard) {
+      bookingCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+}
+window.selectQuickSlot = selectQuickSlot;
+
+function attachSlotPillSync() {
+  const slotSelect = document.getElementById("slot_time");
+  if (!slotSelect) return;
+
+  slotSelect.addEventListener("change", function () {
+    const val = this.value;
+    document.querySelectorAll(".slot-pill").forEach(function (pill) {
+      if (pill.dataset.slot === val) {
+        pill.classList.add("slot-pill--selected");
+      } else {
+        pill.classList.remove("slot-pill--selected");
+      }
+    });
+  });
+}
+
+/* ============================================================
    9. INIT
    ============================================================ */
 document.addEventListener("DOMContentLoaded", function () {
@@ -404,6 +448,8 @@ document.addEventListener("DOMContentLoaded", function () {
   attachPasswordToggle();
   attachTopNavToggle();
   attachMobileSidebarToggle();
+  attachSlotPillSync();
   autoDismissFlash();
   scrollToFlash();
 });
+

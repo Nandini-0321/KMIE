@@ -21,7 +21,7 @@
         {% endfor %}
       </select>
       {% if not enquiries %}
-      <span class="form-hint">⚠️ No student leads registered yet. Submit an enquiry first.</span>
+      <span class="form-hint">⚠️ No student leads registered yet. Submit an enquiry below first.</span>
       {% endif %}
       <span class="form-error" id="err-lead_id"></span>
     </div>
@@ -65,11 +65,11 @@
   </div>
 
   <div class="form-actions">
-    <button type="submit" class="btn btn--secondary" id="submitBookingBtn">
+    <button type="submit" class="btn btn--primary" id="submitBookingBtn">
       <span class="btn-icon">📅</span>
       Confirm Demo Booking
     </button>
-    <button type="reset" class="btn btn--ghost">
+    <button type="reset" class="btn btn--ghost" onclick="clearBookingErrors()">
       Clear
     </button>
   </div>
